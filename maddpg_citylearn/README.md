@@ -1,9 +1,10 @@
 # MADDPG para Control de Flexibilidad Energética en Comunidades Interactivas
 
 ## Tema de Tesis
-**MULTI-AGENTE DE APRENDIZAJE PROFUNDO POR REFUERZO PARA EL CONTROL DE LA FLEXIBILIDAD ENERGÉTICA EN COMUNIDADES INTERACTIVAS CON LA RED ELÉCTRICA PÚBLICA**
 
-Implementación de Multi-Agent Deep Deterministic Policy Gradient (MADDPG) aplicado al control coordinado de edificios inteligentes en comunidades energéticas que interactúan con la red eléctrica pública. El sistema permite gestionar de manera óptima la flexibilidad energética mediante agentes autónomos que aprenden a coordinar consumo, almacenamiento y generación distribuida para maximizar eficiencia y minimizar costos.
+Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la Optimización de la Flexibilidad Energética en Comunidades Interactivas de Redes Eléctricas Inteligentes
+
+Implementación de Multi-Agent Deep Deterministic Policy Gradient (MADDPG) aplicado al control coordinado de edificios inteligentes en comunidades energéticas que interactúan con redes eléctricas inteligentes. El sistema permite gestionar de manera óptima la flexibilidad energética mediante agentes autónomos que aprenden a coordinar consumo, almacenamiento y generación distribuida para maximizar eficiencia y minimizar costos.
 
 ## Instalación
 
@@ -64,7 +65,7 @@ docker run -p 8000:8000 -v $(pwd)/models:/app/models maddpg-citylearn
 
 ## Objetivo Principal
 
-**MULTI-AGENTE DE APRENDIZAJE PROFUNDO POR REFUERZO PARA EL CONTROL DE LA FLEXIBILIDAD ENERGÉTICA EN COMUNIDADES INTERACTIVAS CON LA RED ELÉCTRICA**
+Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la Optimización de la Flexibilidad Energética en Comunidades Interactivas de Redes Eléctricas Inteligentes
 
 El sistema MADDPG entrena agentes autónomos (uno por edificio) que aprenden políticas coordinadas para:
 
@@ -77,7 +78,7 @@ El sistema MADDPG entrena agentes autónomos (uno por edificio) que aprenden pol
 ### Recursos Controlables por Agente
 
 | Recurso | Acción del Agente |
-|---------|-------------------|
+| ------- | ----------------- |
 | Batería estacionaria | Carga/descarga |
 | Vehículo Eléctrico (EV) | Carga diferible |
 | HVAC | Setpoints temperatura |
@@ -98,7 +99,7 @@ reward_weights:
 ## Alineación con "Guía Integral 2025 para Despliegue de Modelos ML/DL/LLM"
 
 | Numeral | Tema | Implementación |
-|---------|------|----------------|
+| ------- | ---- | -------------- |
 | **1. Introducción** | Contexto del despliegue | `README.md`, `THESIS_CONTEXT.md`, `DEPLOYMENT_GUIDE.md` |
 | **2. Contenedorización Docker** | | |
 | 2.1 Buenas prácticas | Multi-stage, slim, no-root | `Dockerfile` con `python:3.11-slim`, `appuser:1001` |
@@ -121,7 +122,7 @@ reward_weights:
 
 ### Archivos Clave de Despliegue
 
-```
+```text
 kubernetes/
 ├── deployment.yaml      # Pods con security context, probes
 ├── service.yaml         # ClusterIP + LoadBalancer

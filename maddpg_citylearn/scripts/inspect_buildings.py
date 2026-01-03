@@ -20,7 +20,7 @@ for i, building in enumerate(env.buildings):
             f"  ☀️  Solar PV: {building.pv.nominal_power:.2f} kW (capacidad nominal)"
         )
     else:
-        print(f"  ☀️  Solar PV: NO disponible")
+        print("  ☀️  Solar PV: NO disponible")
 
     # Batería eléctrica
     if building.electrical_storage is not None:
@@ -31,7 +31,7 @@ for i, building in enumerate(env.buildings):
             f"  🔋 Batería: {capacity:.2f} kWh | Eficiencia: {efficiency:.2%} | Max: {max_power:.2f} kW"
         )
     else:
-        print(f"  🔋 Batería: NO disponible")
+        print("  🔋 Batería: NO disponible")
 
     # Vehículo eléctrico
     if (
@@ -45,7 +45,7 @@ for i, building in enumerate(env.buildings):
         )
         print(f"  🚗 EV: Batería {ev_capacity} kWh | Cargador: {ev_charger} kW")
     else:
-        print(f"  🚗 EV: NO disponible")
+        print("  🚗 EV: NO disponible")
 
     # HVAC (Cooling + Heating)
     cooling = "NO disponible"
@@ -75,7 +75,7 @@ for i, building in enumerate(env.buildings):
         dhw_capacity = building.dhw_storage.capacity
         print(f"  🚿 DHW Storage: {dhw_capacity:.2f} kWh")
     else:
-        print(f"  🚿 DHW: NO disponible")
+        print("  🚿 DHW: NO disponible")
 
     # Dimensiones
     obs = building.observations()

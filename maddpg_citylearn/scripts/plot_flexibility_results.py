@@ -175,13 +175,14 @@ def plot_energy_flexibility_results():
 
     for bar, val in zip(bars4, reward_values):
         offset = 5 if val >= 0 else -15
-        va = "bottom" if val >= 0 else "top"
+        vertical_align = "bottom" if val >= 0 else "top"
         ax4.annotate(
             f"{val:,.0f}",
             xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
             xytext=(0, offset),
             textcoords="offset points",
             ha="center",
+            va=vertical_align,
             fontsize=10,
             fontweight="bold",
         )

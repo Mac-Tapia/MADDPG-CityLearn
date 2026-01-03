@@ -67,8 +67,8 @@ def validate_target_schema():
         # Intentar cargar el environment
         env = CityLearnEnv(schema=target_schema, central_agent=False)
 
-        print(f"\n✓ Schema cargado exitosamente!")
-        print(f"\nInformación del entorno:")
+        print("\n✓ Schema cargado exitosamente!")
+        print("\nInformación del entorno:")
         print(f"  - Número de edificios: {len(env.buildings)}")
         print(f"  - Timesteps totales: {env.time_steps}")
         print(f"  - Dimensión de acción: {env.action_space[0].shape[0]}")
@@ -77,7 +77,7 @@ def validate_target_schema():
         )
 
         # Información sobre edificios
-        print(f"\nEdificios en la comunidad:")
+        print("\nEdificios en la comunidad:")
         for i, building in enumerate(env.buildings):
             print(f"  {i+1}. {building.name}")
 
@@ -107,7 +107,7 @@ def validate_target_schema():
 
     except Exception as e:
         print(f"\n✗ Error cargando schema: {e}")
-        print(f"\nDetalles del error:")
+        print("\nDetalles del error:")
         print(f"  Tipo: {type(e).__name__}")
         print(f"  Mensaje: {str(e)}")
         return False
@@ -123,7 +123,6 @@ def test_environment_step():
 
     try:
         from citylearn.citylearn import CityLearnEnv
-        import numpy as np
 
         env = CityLearnEnv(schema=target_schema, central_agent=False)
 
@@ -141,7 +140,7 @@ def test_environment_step():
 
         next_obs, rewards, done, truncated, info = env.step(actions)
 
-        print(f"✓ Step exitoso")
+        print("✓ Step exitoso")
         print(f"  - Recompensas: {[f'{r:.3f}' for r in rewards[:3]]}...")
         print(f"  - Done: {done}")
         print(f"  - Info keys: {list(info.keys())[:5]}...")
@@ -165,7 +164,7 @@ def main():
         return False
 
     # 2. Listar schemas disponibles
-    available = list_available_schemas()
+    list_available_schemas()
 
     # 3. Validar schema objetivo
     schema_valid = validate_target_schema()

@@ -175,7 +175,12 @@ def generate_comparison_table(
     for r in all_results:
         name = r.get("method", r.get("baseline", "Unknown"))
         lines.append(
-            f"| {name} | {r['mean_reward']:.3f} | {r['std_reward']:.3f} | {r['total_steps']} |"
+            "| {name} | {reward:.3f} | {std:.3f} | {steps} |".format(
+                name=name,
+                reward=r["mean_reward"],
+                std=r["std_reward"],
+                steps=r["total_steps"],
+            )
         )
 
     # KPIs si están disponibles
@@ -207,7 +212,13 @@ def generate_comparison_table(
             return str(v)
 
         lines.append(
-            f"| {name} | {fmt(cost)} | {fmt(co2)} | {fmt(peak)} | {fmt(load_factor)} |"
+            "| {name} | {cost} | {co2} | {peak} | {load} |".format(
+                name=name,
+                cost=fmt(cost),
+                co2=fmt(co2),
+                peak=fmt(peak),
+                load=fmt(load_factor),
+            )
         )
 
     # Análisis
@@ -216,7 +227,10 @@ def generate_comparison_table(
             "",
             "## Análisis",
             "",
-            f"- **MADDPG** obtuvo reward medio de **{maddpg_results['mean_reward']:.3f}**",
+            (
+                "- **MADDPG** obtuvo reward medio de "
+                f"**{maddpg_results['mean_reward']:.3f}**"
+            ),
         ]
     )
 
@@ -230,10 +244,15 @@ def generate_comparison_table(
     )
 
     lines.append(
-        f"- Mejor baseline ({best_baseline['baseline']}): **{best_baseline['mean_reward']:.3f}**"
+        "- Mejor baseline ({name}): **{score:.3f}**".format(
+            name=best_baseline["baseline"], score=best_baseline["mean_reward"]
+        )
     )
     lines.append(
-        f"- Mejora de MADDPG sobre mejor baseline: **{improvement:+.3f}** ({pct:+.1f}%)"
+        (
+            "- Mejora de MADDPG sobre mejor baseline: "
+            f"**{improvement:+.3f}** ({pct:+.1f}%)"
+        )
     )
 
     return "\n".join(lines)

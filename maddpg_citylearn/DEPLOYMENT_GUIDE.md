@@ -1,19 +1,8 @@
-# Ver logs en tiempo real
-kubectl logs -f deployment/maddpg-citylearn
-
-# Ver estado
-kubectl get all -l app=maddpg-citylearn
-
-# Escalar replicas
-kubectl scale deployment/maddpg-citylearn --replicas=3
-
-# Dashboard de Kubernetes
-kubectl proxy
-# Luego abre: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/# Guía de Despliegue MADDPG CityLearn - Implementación Completa
+# Guía de Despliegue MADDPG CityLearn - Implementación Completa
 
 ## 📋 Alineación con "Guía Integral 2025 para Despliegue de Modelos ML/DL/LLM"
 
-**Tema de Tesis**: MULTI-AGENTE DE APRENDIZAJE PROFUNDO POR REFUERZO PARA EL CONTROL DE LA FLEXIBILIDAD ENERGÉTICA EN COMUNIDADES INTERACTIVAS CON LA RED ELÉCTRICA PÚBLICA
+**Tema de Tesis**: Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la Optimización de la Flexibilidad Energética en Comunidades Interactivas de Redes Eléctricas Inteligentes
 
 **Documento de Referencia**: `Guía Integral 2025 para Despliegue de Modelos ML_DL_LLM.pdf`
 
@@ -35,7 +24,7 @@ Este documento presenta la **implementación completa** del despliegue del model
 ### 2.1 Documentación de Referencia
 
 | Archivo | Ubicación | Descripción |
-|---------|-----------|-------------|
+| ------- | --------- | ----------- |
 | **PDF Guía** | `Guía Integral 2025 para Despliegue de Modelos ML_DL_LLM.pdf` | Documento maestro con mejores prácticas de despliegue |
 | **DEPLOYMENT_GUIDE.md** | `maddpg_citylearn/DEPLOYMENT_GUIDE.md` | Esta guía - implementación completa del despliegue |
 | **THESIS_CONTEXT.md** | `maddpg_citylearn/THESIS_CONTEXT.md` | Contexto de la tesis y arquitectura MADDPG |
@@ -44,7 +33,7 @@ Este documento presenta la **implementación completa** del despliegue del model
 
 ### 2.2 Estructura de Implementación
 
-```
+```text
 maddpg_citylearn/
 ├── 📄 DEPLOYMENT_GUIDE.md          # ← ESTA GUÍA (implementación completa)
 ├── 📄 THESIS_CONTEXT.md            # Contexto académico y arquitectura
@@ -128,26 +117,32 @@ maddpg_citylearn/
 **Referencia PDF**: Sección "Buenas Prácticas en Contenedorización"
 
 1. **Instalación de dependencias** (`install.ps1`):
+
    ```powershell
    .\install.ps1
    ```
+
    - Crea entorno virtual Python 3.11
    - Instala PyTorch 2.5.1 con CUDA 12.1
    - Instala CityLearn v2 (sin dependencias problemáticas)
    - Configura estructura de directorios
 
 2. **Entrenamiento del modelo** (`scripts/train_citylearn.py`):
+
    ```powershell
    python -m maddpg_tesis.scripts.train_citylearn
    ```
+
    - Entrena 17 agentes MADDPG
    - Genera checkpoints: `maddpg.pt`, `maddpg_val_best.pt`, `maddpg_last.pt`
    - Guarda en `models/citylearn_maddpg/`
 
 3. **Validación local** (FastAPI):
+
    ```powershell
    uvicorn maddpg_tesis.api.main:app --reload --host 0.0.0.0 --port 8080
    ```
+
    - Endpoints disponibles:
      - `GET /health` - Health check
      - `GET /ready` - Readiness (verifica modelo cargado)
@@ -168,6 +163,7 @@ docker build -t maddpg-citylearn:latest .
 ```
 
 **Resultado**: Imagen de **13.4 GB** con:
+
 - Python 3.11-slim (base mínima)
 - PyTorch 2.5.1 + CUDA 12.1
 - CityLearn v2 + dependencias
@@ -226,7 +222,7 @@ docker cp "static/dashboard.html" maddpg-citylearn:/app/static/dashboard.html
 ### 4.4 Dockerfile - Mejores Prácticas Implementadas ✅
 
 | Práctica PDF | Implementación |
-|--------------|----------------|
+| ------------ | -------------- |
 | **Multi-stage build** | ✅ Builder + Runtime separados |
 | **Imagen base mínima** | ✅ `python:3.11-slim` (~45MB) |
 | **Usuario no-root** | ✅ `USER appuser` (UID 1001) |
@@ -245,12 +241,12 @@ docker cp "static/dashboard.html" maddpg-citylearn:/app/static/dashboard.html
 
 **Archivo**: `static/dashboard.html` (108KB, ~2004 líneas)
 
-**Acceso**: http://localhost:8080/static/dashboard.html
+**Acceso**: <http://localhost:8080/static/dashboard.html>
 
 ### 5.2 Características del Dashboard
 
 | Componente | Descripción | Tecnología |
-|------------|-------------|------------|
+| ---------- | ----------- | ---------- |
 | **Auto-refresh** | Actualización cada 5 segundos | JavaScript setInterval |
 | **Endpoint API** | `/predict` con 42 observaciones | FastAPI JSON |
 | **Visualización** | 6 gráficos interactivos | Chart.js 4.x |
@@ -353,10 +349,8 @@ console.log(`Update ${n}:`, {
 
 ### 6.1 Componentes Implementados
 
-### 6.1 Componentes Implementados
-
 | Componente | Archivo | Propósito | Estado |
-|------------|---------|-----------|--------|
+| ---------- | ------- | --------- | ------ |
 | **Deployment Base** | `deployment.yaml` | Inferencia CPU, 2 réplicas | ✅ |
 | **Deployment GPU** | `deployment-gpu.yaml` | Inferencia con NVIDIA GPU | ✅ |
 | **Deployment Local** | `deployment-local.yaml` | Docker Desktop (NodePort 30080) | ✅ |
@@ -539,7 +533,7 @@ spec:
 ### 7.1 Checklist de Seguridad Implementado
 
 | Criterio PDF | Implementación | Estado |
-|--------------|----------------|--------|
+| ------------ | -------------- | ------ |
 | **Usuario no-root** | `USER appuser:1001` en Dockerfile | ✅ |
 | **Imagen mínima** | `python:3.11-slim` (45MB base) | ✅ |
 | **Multi-stage build** | Builder + Runtime separados | ✅ |
@@ -579,7 +573,7 @@ jobs:
 ### 8.1 Métricas de Rendimiento
 
 | Métrica | Valor | Fuente |
-|---------|-------|--------|
+| ------- | ----- | ------ |
 | **Latencia inferencia** | ~50-80ms | FastAPI /predict |
 | **Throughput** | ~12-20 req/s | Load testing |
 | **Tamaño imagen** | 13.4 GB | Docker image |
@@ -593,12 +587,13 @@ jobs:
 **Dashboard comparativo** (17 edificios, 24h simulación):
 
 | Estrategia | Demanda Agregada | Ahorro vs Baseline | Estado |
-|------------|------------------|---------------------|--------|
+| ---------- | ---------------- | ------------------- | ------ |
 | **Baseline** (sin control) | 85-120 kW | - | ✅ Referencia |
 | **MARLISA** (single-agent) | 65-95 kW | 15-25% | ✅ SOTA |
 | **MADDPG** (multi-agent) | 50-80 kW | **30-40%** | ✅ Propuesto |
 
 **Observaciones clave**:
+
 - MADDPG supera a MARLISA en **10-15 puntos porcentuales**
 - Coordinación multi-agente permite:
   - Arbitraje battery más agresivo (25% vs 15% C-rate)
@@ -609,7 +604,7 @@ jobs:
 ### 8.3 Recursos Optimizados
 
 | Recurso | MARLISA | MADDPG | Mejora |
-|---------|---------|--------|--------|
+| ------- | ------- | ------ | ------ |
 | **Battery C-rate** | 15% | 25% | +66% |
 | **HVAC reduction** | 15% | 30% | +100% |
 | **DHW control** | No | 20% | Nuevo |
@@ -735,7 +730,7 @@ curl http://localhost:8080/predict -Method POST -Body $body -ContentType "applic
 ### 10.1 Problemas Comunes
 
 | Problema | Causa | Solución |
-|----------|-------|----------|
+| -------- | ----- | -------- |
 | **Dashboard baseline=0** | Observaciones 0 en test data | ✅ Corregido con fallback values |
 | **CUDA not available** | GPU no detectada | Verificar `--gpus all` en Docker |
 | **Model not loading** | Ruta incorrecta | Verificar `/app/models/citylearn_maddpg/maddpg.pt` |
@@ -767,15 +762,12 @@ kubectl get pod <pod-name> -o yaml  # Configuración completa
 
 ---
 
-## 11. Conclusiones
----
-
 ## 11. Conclusiones y Cumplimiento de la Guía PDF ✅
 
 ### 11.1 Cobertura de la Guía Integral 2025
 
 | Sección PDF | Implementación MADDPG | Estado |
-|-------------|------------------------|--------|
+| ----------- | ---------------------- | ------ |
 | **1. Contenedorización** | Docker multi-stage, usuario no-root, healthcheck | ✅ Completo |
 | **2. Orquestación Kubernetes** | Deployments, Service, HPA, NetworkPolicy, Monitoring | ✅ Completo |
 | **3. Machine Learning** | FastAPI REST API, /predict endpoint, metrics | ✅ Completo |
@@ -798,7 +790,7 @@ kubectl get pod <pod-name> -o yaml  # Configuración completa
 ### 11.3 Diferenciadores vs Estado del Arte
 
 | Aspecto | MARLISA (SOTA) | MADDPG (Propuesto) |
-|---------|----------------|---------------------|
+| ------- | -------------- | ------------------- |
 | **Enfoque** | Single-agent | Multi-agent (17 agentes) |
 | **Battery** | 15% C-rate | 25% C-rate (+66%) |
 | **HVAC** | 15% reduction | 30% reduction (+100%) |
@@ -821,6 +813,7 @@ kubectl get pod <pod-name> -o yaml  # Configuración completa
 ### 11.5 Archivos Clave Entregables
 
 ✅ **Documentación**:
+
 - `DEPLOYMENT_GUIDE.md` - Esta guía completa (actualizada)
 - `THESIS_CONTEXT.md` - Contexto académico
 - `README.md` - Documentación general
@@ -828,6 +821,7 @@ kubectl get pod <pod-name> -o yaml  # Configuración completa
 - `COMPLIANCE_REPORT.md` - Compliance con PDF
 
 ✅ **Código**:
+
 - `Dockerfile` - Contenedor production-ready (13.4 GB)
 - `docker-compose.yml` - Orquestación local
 - `kubernetes/*.yaml` - 13 manifiestos K8s
@@ -835,11 +829,13 @@ kubectl get pod <pod-name> -o yaml  # Configuración completa
 - `static/dashboard.html` - Dashboard interactivo (108KB)
 
 ✅ **Modelos**:
+
 - `models/citylearn_maddpg/maddpg.pt` - Modelo entrenado
 - `models/citylearn_maddpg/maddpg_val_best.pt` - Mejor validación
 - `models/citylearn_maddpg/maddpg_last.pt` - Último checkpoint
 
 ✅ **Tests**:
+
 - `tests/test_api.py` - Tests endpoints FastAPI
 - `tests/test_core.py` - Tests lógica core
 - `tests/test_maddpg.py` - Tests algoritmo MADDPG
@@ -870,7 +866,7 @@ kubectl get pod <pod-name> -o yaml  # Configuración completa
 ### 12.2 Tecnologías Utilizadas
 
 | Tecnología | Versión | Propósito |
-|------------|---------|-----------|
+| ---------- | ------- | --------- |
 | Python | 3.11 | Lenguaje base |
 | PyTorch | 2.5.1 | Framework DL |
 | CUDA | 12.1 | Aceleración GPU |
@@ -896,6 +892,7 @@ kubectl get pod <pod-name> -o yaml  # Configuración completa
 **Estado**: ✅ **IMPLEMENTACIÓN COMPLETA Y FUNCIONAL**
 
 **Verificación Final**:
+
 ```powershell
 # 1. Contenedor corriendo
 docker ps | Select-String "maddpg-citylearn"
@@ -914,6 +911,7 @@ curl http://localhost:8080/metrics
 ```
 
 **Comandos de gestión rápida**:
+
 ```powershell
 docker pause maddpg-citylearn     # Pausar
 docker unpause maddpg-citylearn   # Reanudar
@@ -924,6 +922,6 @@ docker logs -f maddpg-citylearn   # Ver logs
 
 ---
 
-**✅ PROYECTO COMPLETO - ALINEADO CON GUÍA INTEGRAL 2025 PARA DESPLIEGUE DE MODELOS ML/DL/LLM**
+PROYECTO COMPLETO - ALINEADO CON GUÍA INTEGRAL 2025 PARA DESPLIEGUE DE MODELOS ML/DL/LLM
 
-*Última actualización: 9 de diciembre de 2025*
+Última actualización: 9 de diciembre de 2025

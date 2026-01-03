@@ -2,15 +2,16 @@
 
 ## Tema de Tesis
 
-**MULTI-AGENTE DE APRENDIZAJE PROFUNDO POR REFUERZO PARA EL CONTROL DE LA FLEXIBILIDAD ENERGÉTICA EN COMUNIDADES INTERACTIVAS CON LA RED ELÉCTRICA PÚBLICA**
+Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la Optimización de la Flexibilidad Energética en Comunidades Interactivas de Redes Eléctricas Inteligentes
 
 ## Objetivo de Investigación
 
-Desarrollar e implementar un sistema multi-agente basado en Deep Reinforcement Learning (específicamente MADDPG) para controlar de manera óptima y coordinada la flexibilidad energética en comunidades de edificios inteligentes que interactúan con la red eléctrica pública.
+Desarrollar e implementar un sistema multi-agente basado en Deep Reinforcement Learning (específicamente MADDPG) para controlar de manera óptima y coordinada la flexibilidad energética en comunidades de edificios inteligentes que interactúan con redes eléctricas inteligentes.
 
 ## Componentes Clave de la Investigación
 
 ### 1. Sistema Multi-Agente
+
 - **Agentes Autónomos**: Cada edificio/unidad de la comunidad opera como un agente independiente
 - **Coordinación Distribuida**: Los agentes aprenden a coordinar sus acciones para optimización global
 - **Descentralización**: Ejecución local autónoma tras entrenamiento centralizado
@@ -24,7 +25,8 @@ La flexibilidad energética se refiere a la capacidad de los edificios de ajusta
 - **Estabilidad de Red**: Servicios auxiliares, balance oferta-demanda
 - **Recursos Locales**: Optimización de generación solar, baterías, cargas controlables
 
-#### Recursos Controlables:
+#### Recursos Controlables
+
 - **Cargas Térmicas**: HVAC, calefacción, refrigeración (mayor inercia térmica)
 - **Almacenamiento**: Baterías eléctricas, almacenamiento térmico
 - **Generación Distribuida**: Paneles solares, cogeneración
@@ -39,7 +41,8 @@ Las comunidades energéticas representan agregaciones de edificios que:
 - **Contribuyen a la Red**: Estabilidad, reducción de inversiones en infraestructura
 - **Responden a Señales**: Precio, frecuencia, demanda de respuesta (demand response)
 
-#### Características de Interacción:
+#### Características de Interacción
+
 - Punto de acoplamiento común (PCC - Point of Common Coupling)
 - Medición neta agregada (net metering)
 - Contratos de compra/venta con utilities
@@ -56,6 +59,7 @@ Las comunidades energéticas representan agregaciones de edificios que:
 5. **Off-Policy**: Aprendizaje eficiente de datos históricos
 
 **Componentes del Algoritmo:**
+
 - **Actor Descentralizado**: Cada edificio tiene su propia política de control
 - **Crítico Centralizado**: Evalúa valor de acciones conjuntas considerando todos los agentes
 - **Target Networks**: Estabilidad en entrenamiento
@@ -77,6 +81,7 @@ El entorno **CityLearn** con el dataset `citylearn_challenge_2022_phase_all_plus
 ### Importancia de los Vehículos Eléctricos
 
 Los EVs son particularmente importantes para la flexibilidad energética porque:
+
 - **Gran capacidad de almacenamiento**: Baterías de 40-100 kWh
 - **Conectividad predecible**: Patrones de llegada/salida en horarios típicos
 - **Cargas diferibles**: Flexibilidad en ventanas de carga (8-12 horas)
@@ -95,24 +100,27 @@ Las métricas típicas incluyen:
 
 ## Contribuciones Esperadas de la Tesis
 
-### Técnicas:
+### Técnicas
+
 - ✅ Implementación escalable de MADDPG para control energético
 - ✅ Arquitectura descentralizada para ejecución en tiempo real
 - ✅ Metodología de entrenamiento eficiente
 
-### Prácticas:
+### Prácticas
+
 - ✅ Sistema deployable en producción (Docker/Kubernetes)
 - ✅ API REST para integración con sistemas BMS/EMS
 - ✅ Monitoreo y observabilidad para operación continua
 
-### Científicas:
+### Científicas
+
 - 📊 Análisis comparativo con métodos baseline (RBC, MPC)
 - 📈 Estudio de escalabilidad con número de edificios
 - 🔬 Evaluación de transferibilidad entre comunidades
 
 ## Arquitectura del Sistema Implementado
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │              COMUNIDAD ENERGÉTICA INTERACTIVA                │
 │                                                              │
@@ -156,14 +164,17 @@ Las métricas típicas incluyen:
 ## Referencias Teóricas
 
 ### Algoritmo MADDPG
+
 - **Paper Original**: "Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments" (Lowe et al., 2017)
 - **Extensión**: Aplicación a control continuo multi-agente
 
 ### CityLearn
+
 - **Framework**: CityLearn v2.x - Multi-Agent RL for Building Energy Management
 - **Challenge**: CityLearn Challenge 2023 Phase 2
 
 ### Flexibilidad Energética
+
 - **IEA**: Demand Response and Flexibility Services
 - **IEEE**: Smart Grid Communications and Control
 

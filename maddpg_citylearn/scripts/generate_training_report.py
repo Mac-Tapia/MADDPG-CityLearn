@@ -3,7 +3,6 @@ Script para generar gráficos y análisis detallado del entrenamiento MADDPG.
 Genera visualizaciones de KPIs y comparación con baselines.
 """
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -43,7 +42,6 @@ def parse_kpis_string(kpis_str: str) -> pd.DataFrame:
             # Parsear línea de datos
             parts = line.split()
             if len(parts) >= 4:
-                idx = parts[0]
                 # Reconstruir el nombre de la métrica (puede tener espacios)
                 # El valor está antes del nombre del edificio/district
                 # Buscar el patrón: idx, cost_function, value, name, level
@@ -98,7 +96,7 @@ def extract_district_kpis(kpis_str: str) -> dict:
                         break
                     except ValueError:
                         continue
-            except:
+            except Exception:
                 continue
 
     return kpis
@@ -153,13 +151,6 @@ def plot_reward_comparison(maddpg_eval: dict, baselines: list):
 
 def plot_kpi_comparison(maddpg_eval: dict, baselines: list):
     """Gráfico de comparación de KPIs principales."""
-    # KPIs principales a nivel distrito
-    kpi_names = [
-        "cost_total",
-        "carbon_emissions_total",
-        "all_time_peak_average",
-        "daily_one_minus_load_factor_average",
-    ]
     kpi_labels = [
         "Costo Total",
         "Emisiones CO₂",
@@ -183,7 +174,7 @@ def plot_kpi_comparison(maddpg_eval: dict, baselines: list):
 
     colors = ["#95a5a6", "#3498db", "#e74c3c", "#9b59b6", "#2ecc71"]
 
-    for idx, (kpi, label) in enumerate(zip(kpi_labels, kpi_labels)):
+    for idx, label in enumerate(kpi_labels):
         ax = axes[idx]
         values = kpi_data[label]
         bars = ax.bar(

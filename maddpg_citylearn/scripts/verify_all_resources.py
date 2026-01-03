@@ -3,11 +3,6 @@ Verificar TODOS los recursos disponibles en el dataset
 para confirmar alcance de tesis MADRL control flexibilidad energética
 """
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
 from citylearn.citylearn import CityLearnEnv
 
 

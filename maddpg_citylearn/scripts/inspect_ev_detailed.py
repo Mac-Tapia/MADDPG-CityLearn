@@ -50,7 +50,7 @@ for i, building in enumerate(env.buildings):
         "electric_vehicle_state_of_charge",
     ]
 
-    print(f"  ├─ Observaciones EV disponibles:")
+    print("  ├─ Observaciones EV disponibles:")
     for ev_obs_name in ev_obs_names:
         if ev_obs_name in obs_dict:
             value = obs_dict[ev_obs_name]
@@ -106,7 +106,7 @@ for step in range(100):
                             "charge_rate": ev_charge_rate,
                         }
                     )
-    except:
+    except Exception:
         break
 
 print("\n🔍 RESULTADOS DE LA DETECCIÓN:")
@@ -121,10 +121,18 @@ if total_with_ev_data > 0:
         if has_data:
             print(f"  - Building_{i+1} (ID {i})")
             if non_zero_values[i]:
-                print(f"    Ejemplos de valores no-cero:")
+                print("    Ejemplos de valores no-cero:")
                 for val in non_zero_values[i][:3]:
                     print(
-                        f"      Step {val['step']}: availability={val['availability']}, soc={val['soc']:.3f}, charge_rate={val['charge_rate']:.3f}"
+                        (
+                            "      Step {step}: availability={availability}, "
+                            "soc={soc:.3f}, charge_rate={charge_rate:.3f}"
+                        ).format(
+                            step=val["step"],
+                            availability=val["availability"],
+                            soc=val["soc"],
+                            charge_rate=val["charge_rate"],
+                        )
                     )
 else:
     print("❌ NO SE DETECTARON DATOS EV REALES en ningún edificio")
