@@ -163,39 +163,103 @@ cd maddpg_citylearn
 docker build -t maddpg-citylearn:latest .
 ```
 
-**Resultado**: Imagen de **13.4 GB** con:
+**Resultado**: Imagen de **~8 GB** con:
 
-- Python 3.11-slim (base mínima)
+- NVIDIA CUDA 12.1 Runtime (Ubuntu 22.04)
+- Python 3.11 (runtime mínimo)
 - PyTorch 2.5.1 + CUDA 12.1
 - CityLearn v2 + dependencias
-- Modelo MADDPG pre-entrenado
+- Modelo CooperativeMADDPG pre-entrenado
 - Usuario no-root (`appuser:1001`)
 - Healthcheck cada 30s
 
-### 4.2 Ejecución con Docker ✅
+### 4.2 Ejecución con Docker (CPU) ✅
 
 ```powershell
-# Ejecutar contenedor
+# Ejecutar contenedor (modo CPU)
 docker run -d `
   --name maddpg-citylearn `
-  -p 8080:8080 `
+  -p 8000:8000 `
+  -v ${PWD}/models:/app/models:ro `
+  -v ${PWD}/logs:/app/logs `
   maddpg-citylearn:latest
 
 # Verificar logs
 docker logs -f maddpg-citylearn
 
 # Verificar endpoints
-curl http://localhost:8080/health
+curl http://localhost:8000/health
 # Output: {"status":"healthy"}
 
-curl http://localhost:8080/ready
+curl http://localhost:8000/ready
 # Output: {"status":"ready","model_loaded":true}
-
-curl http://localhost:8080/metrics
-# Output: model_info{...}, uptime_seconds, ...
 ```
 
-### 4.3 Gestión del Contenedor ✅
+### 4.3 Ejecución con Docker (GPU NVIDIA) ✅
+
+```powershell
+# Verificar que Docker tenga acceso a GPU
+docker run --rm --gpus all nvidia/smi
+
+# Ejecutar contenedor con GPU
+docker run -d `
+  --name maddpg-citylearn-gpu `
+  --gpus all `
+  -p 8000:8000 `
+  -v ${PWD}/models:/app/models:ro `
+  -v ${PWD}/logs:/app/logs `
+  -e NVIDIA_VISIBLE_DEVICES=all `
+  maddpg-citylearn:latest
+
+# Verificar que CUDA esté disponible
+docker exec maddpg-citylearn-gpu python -c "import torch; print(f'CUDA: {torch.cuda.is_available()}')"
+```
+
+### 4.4 Ejecución con Docker Compose ✅
+
+```powershell
+# Iniciar todos los servicios
+docker-compose up -d
+
+# Ver logs en tiempo real
+docker-compose logs -f maddpg-api
+
+# Ver estado de servicios
+docker-compose ps
+
+# Detener servicios
+docker-compose down
+```
+
+### 4.5 Monitoreo del Entrenamiento en Tiempo Real ✅
+
+Mientras el modelo entrena localmente, puedes monitorear el progreso:
+
+```powershell
+# Ver progreso del entrenamiento (logs en tiempo real)
+Get-Content models/citylearn_maddpg/training.log -Wait -Tail 50
+
+# Ver últimas líneas del log
+Get-Content models/citylearn_maddpg/training.log -Tail 100
+
+# Ver métricas de entrenamiento
+Get-Content reports/training_report.md
+
+# Monitorear uso de GPU durante entrenamiento
+nvidia-smi -l 1
+```
+
+**Métricas de Entrenamiento Actuales:**
+
+| Métrica | Valor | Estado |
+| ------- | ----- | ------ |
+| **Episodios** | 50 | En progreso |
+| **Steps/Episodio** | 8,760 | (1 año horario) |
+| **GPU** | RTX 4060 | 8.59 GB VRAM |
+| **Paradigma** | CTDE | Team Reward |
+| **Agentes** | 17 | Cooperativos |
+
+### 4.6 Gestión del Contenedor ✅
 
 ```powershell
 # Pausar (congela el proceso, mantiene memoria)
@@ -216,21 +280,24 @@ docker logs -f maddpg-citylearn
 # Acceder al contenedor
 docker exec -it maddpg-citylearn bash
 
-# Copiar dashboard actualizado
-docker cp "static/dashboard.html" maddpg-citylearn:/app/static/dashboard.html
+# Copiar modelo actualizado al contenedor
+docker cp models/citylearn_maddpg/maddpg.pt maddpg-citylearn:/app/models/citylearn_maddpg/
+
+# Reiniciar para cargar nuevo modelo
+docker restart maddpg-citylearn
 ```
 
-### 4.4 Dockerfile - Mejores Prácticas Implementadas ✅
+### 4.7 Dockerfile - Mejores Prácticas Implementadas ✅
 
 | Práctica PDF | Implementación |
 | ------------ | -------------- |
 | **Multi-stage build** | ✅ Builder + Runtime separados |
-| **Imagen base mínima** | ✅ `python:3.11-slim` (~45MB) |
+| **Imagen base CUDA** | ✅ `nvidia/cuda:12.1.0-runtime-ubuntu22.04` |
 | **Usuario no-root** | ✅ `USER appuser` (UID 1001) |
 | **Healthcheck** | ✅ Verificación `/health` cada 30s |
 | **Layer caching** | ✅ COPY requirements antes de código |
 | **.dockerignore** | ✅ Excluye .venv, tests, .git |
-| **Secrets seguros** | ✅ No hardcoded (ConfigMaps en K8s) |
+| **GPU Support** | ✅ NVIDIA_VISIBLE_DEVICES, CUDA env vars |
 
 ---
 
@@ -242,7 +309,7 @@ docker cp "static/dashboard.html" maddpg-citylearn:/app/static/dashboard.html
 
 **Archivo**: `static/dashboard.html` (108KB, ~2004 líneas)
 
-**Acceso**: <http://localhost:8080/static/dashboard.html>
+**Acceso**: <http://localhost:8000/static/dashboard.html>
 
 ### 5.2 Características del Dashboard
 
