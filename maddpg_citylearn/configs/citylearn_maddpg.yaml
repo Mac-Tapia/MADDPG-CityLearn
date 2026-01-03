@@ -1,45 +1,57 @@
-# TODO: pegar aquí la config YAML.
+# Configuración MADDPG para CityLearn v2.5 - Comparación con MARLISA
+# =================================================================
+# Este archivo configura MADDPG para ser comparable con MARLISA:
+# - Mismo schema: citylearn_challenge_2022_phase_all_plus_evs
+# - Misma reward function: Electric_Vehicles_Reward_Function (nativa)
+# - Mismos KPIs de evaluación
+# - 17 agentes (edificios), 8760 steps/episodio
+
 env:
-  # Dataset con vehículos eléctricos para control de flexibilidad energética
+  # Dataset con vehículos eléctricos - IGUAL QUE MARLISA
   schema: "citylearn_challenge_2022_phase_all_plus_evs"
-  simulation_start_time_step: null
-  simulation_end_time_step: null
-  reward_function: null
-  # Pesos para recompensa personalizada orientada a FLEXIBILIDAD ENERGÉTICA
-  # Ajustar según prioridad del objetivo de tesis
-  reward_weights:
-    cost: 1.0         # penaliza costo energético (respuesta a precio dinámico)
-    peak: 0.5         # penaliza picos de demanda (peak shaving)
-    co2: 0.3          # penaliza emisiones de carbono
-    discomfort: 0.2   # penaliza disconfort térmico (restricción de confort)
+  simulation_start_time_step: null  # Usar todo el año
+  simulation_end_time_step: null    # 8760 steps
+  # Usar reward function NATIVA de CityLearn (Electric_Vehicles_Reward_Function)
+  # Esto asegura comparación justa con MARLISA que también la usa
+  reward_function: null  # null = usa la del schema (EV_Reward_Function)
+  # NO usar reward_weights custom para comparación justa
+  reward_weights: null
 
 maddpg:
-  gamma: 0.95               # Reducido: horizonte más corto para señales más claras
-  tau: 0.005                # Estándar para DDPG/MADDPG
-  actor_lr: 0.0003          # Learning rate estándar para Adam
-  critic_lr: 0.001          # Crítico aprende más rápido que actor
-  hidden_dim: 256           # Balance rendimiento/memoria para RTX 4060
-  buffer_size: 200000       # ~23 episodios, mejor diversidad de experiencias
-  batch_size: 512           # Optimizado para RTX 4060 8GB - mayor throughput
+  # === HIPERPARÁMETROS - Comparación con MARLISA ===
+  # MARLISA usa: gamma=0.99, tau=0.005, lr=0.0003, hidden=[400,300], batch=100
+  gamma: 0.99               # IGUAL que MARLISA
+  tau: 0.005                # IGUAL que MARLISA
+  actor_lr: 0.0003          # IGUAL que MARLISA
+  critic_lr: 0.0003         # IGUAL que MARLISA (lr único)
+  hidden_dim: 400           # Similar a MARLISA [400, 300] (primera capa)
+  # === BUFFER Y BATCH - Optimizado para GPU ===
+  # MARLISA usa: batch=100, buffer=100k
+  # Nosotros aumentamos para mejor uso de GPU
+  buffer_size: 100000       # IGUAL que MARLISA para comparación justa
+  batch_size: 256           # Mayor que MARLISA para mejor GPU (100 -> 256)
   device: "cuda"            # GPU RTX 4060 Laptop
-  exploration_initial_std: 0.3    # Buena exploración inicial
-  exploration_final_std: 0.05     # Exploración mínima al final
-  exploration_decay_steps: 150000 # Decae en ~17 episodios (~85% del training)
-  update_after: 8760        # Esperar 1 episodio completo antes de entrenar
-  update_every: 25          # Actualizar cada 25 steps - más updates por episodio
-  updates_per_step: 2       # 2 updates por ciclo - aprovechar GPU
+  # === EXPLORACIÓN ===
+  exploration_initial_std: 0.3    # Exploración inicial
+  exploration_final_std: 0.05     # Exploración mínima
+  exploration_decay_steps: 175000 # ~20 episodios
+  # === SCHEDULING DE UPDATES ===
+  update_after: 8760        # 1 episodio completo antes de entrenar
+  update_every: 50          # Updates moderados (similar a SAC)
+  updates_per_step: 1       # 1 update por ciclo (como MARLISA)
 
 training:
-  episodes: 50              # 50 episodios para convergencia adecuada
+  # === ENTRENAMIENTO COMPARABLE CON MARLISA ===
+  episodes: 50              # Suficientes para convergencia
   log_every: 1              # Log cada episodio
-  max_steps_per_episode: null  # Episodio completo (8760 steps/año)
-  seed: 42
+  max_steps_per_episode: null  # 8760 steps completos (1 año)
+  seed: 42                  # Reproducibilidad
   save_dir: "models/citylearn_maddpg"
-  # Validación offline y early stopping
+  # === VALIDACIÓN Y EARLY STOPPING ===
   val_every: 5              # Validar cada 5 episodios
-  val_episodes: 1           # 1 episodio de validación (rápido)
-  early_stopping_patience: 10    # 10 validaciones sin mejora = 50 episodios
-  early_stopping_min_delta: 50.0  # Delta más razonable para convergencia gradual
+  val_episodes: 1           # 1 episodio de validación
+  early_stopping_patience: 10    # Paciencia amplia
+  early_stopping_min_delta: 50.0  # Delta razonable
 
 api:
   host: "0.0.0.0"

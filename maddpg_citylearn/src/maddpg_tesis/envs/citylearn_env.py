@@ -179,7 +179,8 @@ class CityLearnMultiAgentEnv:
                 f"reward inesperado: esperado (n_agents,), recibido {rewards_array.shape}."
             )
 
-        # Recompensa personalizada: pondera costos/CO2/disconfort/picos si se proveen pesos
+        # Recompensa: usar la nativa de CityLearn para comparación justa con MARLISA
+        # Si reward_weights se provee, se aplica ponderación custom después
         if self.reward_weights:
             rewards_array = self._custom_reward(rewards_array, info_dict)
 
