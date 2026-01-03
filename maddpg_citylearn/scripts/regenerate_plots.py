@@ -18,8 +18,11 @@ print("=" * 60)
 
 # 1. GRÁFICA DE PROGRESO DE ENTRENAMIENTO
 fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-fig.suptitle('Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo\npara Optimización de Flexibilidad Energética en Comunidades Interactivas', 
-             fontsize=12, fontweight='bold')
+fig.suptitle(
+    'Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo\n'
+    'para Optimización de Flexibilidad Energética en Comunidades Interactivas',
+    fontsize=12,
+    fontweight='bold')
 
 # Reward medio
 ax1 = axes[0, 0]
@@ -41,7 +44,7 @@ if "agent_rewards" in history and history["agent_rewards"]:
     colors = plt.cm.viridis(np.linspace(0, 1, len(agents)))
     bars = ax2.bar(agents, last_agent_rewards, color=colors, edgecolor='black')
     ax2.axhline(y=np.mean(last_agent_rewards), color='r', linestyle='--', linewidth=2,
-               label=f'Media: {np.mean(last_agent_rewards):,.0f}')
+                label=f'Media: {np.mean(last_agent_rewards):,.0f}')
     ax2.set_xlabel('Agente (Edificio)', fontsize=12)
     ax2.set_ylabel('Reward', fontsize=12)
     ax2.set_title('Reward por Agente (Último Episodio)', fontsize=14)
@@ -64,33 +67,35 @@ if baselines:
     methods = list(baselines.keys())
     baseline_rewards = [baselines[m].get("mean_reward", 0) for m in methods]
     maddpg_reward = np.mean(rewards)
-    
+
     all_methods = methods + ["MADDPG"]
     all_rewards = baseline_rewards + [maddpg_reward]
-    
+
     colors = ['#e74c3c' if r < 0 else '#95a5a6' for r in baseline_rewards] + ['#27ae60']
     bars = ax4.bar(all_methods, all_rewards, color=colors, edgecolor='black', alpha=0.8)
     ax4.axhline(y=0, color='black', linestyle='-', linewidth=1)
     ax4.set_ylabel('Reward Medio', fontsize=12)
     ax4.set_title('Comparación: MADDPG vs Baselines', fontsize=14)
     ax4.tick_params(axis='x', rotation=20)
-    
+
     for bar, val in zip(bars, all_rewards):
         height = bar.get_height()
         y_pos = height + 200 if height >= 0 else height - 500
-        ax4.text(bar.get_x() + bar.get_width()/2, y_pos, f'{val:,.0f}',
+        ax4.text(bar.get_x() + bar.get_width() / 2, y_pos, f'{val:,.0f}',
                  ha='center', va='bottom' if height >= 0 else 'top', fontsize=10, fontweight='bold')
     ax4.grid(True, alpha=0.3, axis='y')
 
 plt.tight_layout()
 plt.savefig(os.path.join(REPORTS_DIR, 'training_progress.png'), dpi=150, bbox_inches='tight')
 plt.close()
-print(f"✅ Gráfica guardada: training_progress.png")
+print("✅ Gráfica guardada: training_progress.png")
 
 # 2. GRÁFICA DE FLEXIBILIDAD ENERGÉTICA (simulada con datos del historial)
 fig2, axes2 = plt.subplots(2, 2, figsize=(14, 10))
-fig2.suptitle('Optimización de Flexibilidad Energética en Comunidades Interactivas\nAnálisis del Sistema Multi-Agente MADDPG', 
-             fontsize=12, fontweight='bold')
+fig2.suptitle(
+    'Optimización de Flexibilidad Energética en Comunidades Interactivas\nAnálisis del Sistema Multi-Agente MADDPG',
+    fontsize=12,
+    fontweight='bold')
 
 # Subplot 1: Rewards por agente en cada episodio
 ax2_1 = axes2[0, 0]
@@ -98,8 +103,8 @@ agent_rewards_array = np.array(history["agent_rewards"])  # [episodes, n_agents]
 n_agents = agent_rewards_array.shape[1]
 
 for ep_idx, ep_rewards in enumerate(agent_rewards_array):
-    ax2_1.plot(range(1, n_agents+1), ep_rewards, 'o-', alpha=0.7, 
-              label=f'Ep {ep_idx+1}', linewidth=2)
+    ax2_1.plot(range(1, n_agents + 1), ep_rewards, 'o-', alpha=0.7,
+               label=f'Ep {ep_idx + 1}', linewidth=2)
 
 ax2_1.set_xlabel('Agente (Edificio)', fontsize=12)
 ax2_1.set_ylabel('Reward', fontsize=12)
@@ -123,7 +128,7 @@ for i, (ep, m) in enumerate(zip(episodes, mejoras)):
 
 # Subplot 3: Distribución de rewards por agente (boxplot)
 ax2_3 = axes2[1, 0]
-bp = ax2_3.boxplot(agent_rewards_array.T, labels=[f'Ep{i}' for i in episodes], 
+bp = ax2_3.boxplot(agent_rewards_array.T, labels=[f'Ep{i}' for i in episodes],
                    patch_artist=True)
 colors_box = plt.cm.Blues(np.linspace(0.3, 0.9, len(episodes)))
 for patch, color in zip(bp['boxes'], colors_box):
@@ -142,13 +147,13 @@ ax2_4.set_title('Mapa de Calor: Rewards por Agente y Episodio', fontsize=14)
 ax2_4.set_xticks(range(len(episodes)))
 ax2_4.set_xticklabels(episodes)
 ax2_4.set_yticks(range(n_agents))
-ax2_4.set_yticklabels([f'B{i+1}' for i in range(n_agents)])
+ax2_4.set_yticklabels([f'B{i + 1}' for i in range(n_agents)])
 plt.colorbar(im, ax=ax2_4, label='Reward')
 
 plt.tight_layout()
 plt.savefig(os.path.join(REPORTS_DIR, 'energy_flexibility.png'), dpi=150, bbox_inches='tight')
 plt.close()
-print(f"✅ Gráfica guardada: energy_flexibility.png")
+print("✅ Gráfica guardada: energy_flexibility.png")
 
 print("\n🎉 Todas las gráficas regeneradas con el nuevo título!")
 print("   - training_progress.png")

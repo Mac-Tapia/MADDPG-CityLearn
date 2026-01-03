@@ -230,9 +230,9 @@ ax = axes[0, 0]
 episodios = np.arange(0, 101)
 
 # MADDPG actual (extrapolado)
-maddpg_actual = 0.98 - 0.02 * (1 - np.exp(-episodios/10))
+maddpg_actual = 0.98 - 0.02 * (1 - np.exp(-episodios / 10))
 # MADDPG mejorado (proyectado)
-maddpg_mejorado = 0.98 - 0.12 * (1 - np.exp(-episodios/25))
+maddpg_mejorado = 0.98 - 0.12 * (1 - np.exp(-episodios / 25))
 # MARLISA referencia
 marlisa_ref = np.ones_like(episodios) * 0.92
 

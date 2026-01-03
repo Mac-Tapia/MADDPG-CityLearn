@@ -2,19 +2,20 @@
 Comparación de Optimización de FV y Carga de VE: MADDPG vs MARLISA
 Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo
 """
+import shutil
 import os
 import json
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 import matplotlib.patches as mpatches
 
 # Configuración
 OUTPUT_DIR = "reports/comparacion_flexibilidad"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-TITULO_PROYECTO = "Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo\npara la Optimización de la Flexibilidad Energética"
+TITULO_PROYECTO = ("Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo\n"
+                   "para la Optimización de la Flexibilidad Energética")
 
 # Cargar KPIs actuales
 with open('reports/continue_training/kpis.json', 'r') as f:
@@ -34,17 +35,17 @@ print("=" * 70)
 horas = np.arange(24)
 
 # Generación Solar FV (perfil típico)
-solar_generation = np.array([0, 0, 0, 0, 0, 5, 20, 45, 70, 85, 95, 100, 
-                              98, 90, 75, 55, 30, 10, 0, 0, 0, 0, 0, 0]) / 100
+solar_generation = np.array([0, 0, 0, 0, 0, 5, 20, 45, 70, 85, 95, 100,
+                             98, 90, 75, 55, 30, 10, 0, 0, 0, 0, 0, 0]) / 100
 
 # Demanda base del edificio
 demanda_base = np.array([30, 25, 22, 20, 20, 25, 40, 60, 75, 80, 85, 88,
-                          90, 88, 85, 82, 85, 90, 95, 85, 70, 55, 45, 35]) / 100
+                         90, 88, 85, 82, 85, 90, 95, 85, 70, 55, 45, 35]) / 100
 
 # Precio de electricidad (TOU - Time of Use)
 precio_electricidad = np.array([0.08, 0.08, 0.08, 0.08, 0.08, 0.10, 0.12, 0.15,
-                                 0.18, 0.20, 0.22, 0.25, 0.25, 0.22, 0.20, 0.18,
-                                 0.20, 0.25, 0.28, 0.25, 0.18, 0.12, 0.10, 0.08])
+                                0.18, 0.20, 0.22, 0.25, 0.25, 0.22, 0.20, 0.18,
+                                0.20, 0.25, 0.28, 0.25, 0.18, 0.12, 0.10, 0.08])
 
 # =============================================================================
 # ESTRATEGIAS DE CONTROL
@@ -52,43 +53,47 @@ precio_electricidad = np.array([0.08, 0.08, 0.08, 0.08, 0.08, 0.10, 0.12, 0.15,
 
 # NO CONTROL (Baseline)
 no_control_ev_charge = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                  0, 0, 0, 0, 0, 60, 80, 70, 50, 30, 10, 0]) / 100
+                                 0, 0, 0, 0, 0, 60, 80, 70, 50, 30, 10, 0]) / 100
 no_control_solar_use = solar_generation * 0.70  # 70% autoconsumo directo
 no_control_grid_import = np.maximum(demanda_base + no_control_ev_charge - no_control_solar_use, 0)
 
 # MARLISA - Optimización iterativa secuencial
 marlisa_ev_charge = np.array([0, 0, 5, 10, 15, 20, 25, 15, 5, 0, 0, 0,
-                               0, 0, 0, 5, 10, 25, 35, 30, 20, 10, 5, 0]) / 100
+                              0, 0, 0, 5, 10, 25, 35, 30, 20, 10, 5, 0]) / 100
 marlisa_solar_use = solar_generation * 0.88  # 88% aprovechamiento solar
 marlisa_battery_charge = np.array([0, 0, 0, 0, 0, 5, 15, 25, 30, 25, 20, 15,
-                                    10, 5, 0, 0, 0, -10, -15, -20, -15, -10, -5, 0]) / 100
+                                   10, 5, 0, 0, 0, -10, -15, -20, -15, -10, -5, 0]) / 100
 marlisa_grid_import = np.maximum(demanda_base + marlisa_ev_charge - marlisa_solar_use - marlisa_battery_charge, 0)
 
 # MADDPG - Control centralizado con entrenamiento descentralizado
 maddpg_ev_charge = np.array([0, 5, 10, 15, 20, 25, 20, 10, 0, 0, 0, 0,
-                              0, 0, 0, 0, 5, 15, 25, 25, 15, 10, 5, 0]) / 100
+                             0, 0, 0, 0, 5, 15, 25, 25, 15, 10, 5, 0]) / 100
 maddpg_solar_use = solar_generation * 0.85  # 85% aprovechamiento solar
 maddpg_battery_charge = np.array([0, 0, 0, 0, 0, 10, 20, 30, 25, 20, 15, 10,
-                                   5, 0, -5, -10, -15, -20, -15, -10, -5, 0, 0, 0]) / 100
+                                  5, 0, -5, -10, -15, -20, -15, -10, -5, 0, 0, 0]) / 100
 maddpg_grid_import = np.maximum(demanda_base + maddpg_ev_charge - maddpg_solar_use - maddpg_battery_charge, 0)
 
 # Métricas calculadas
+
+
 def calcular_metricas(solar_use, ev_charge, grid_import, precio):
     solar_total = np.sum(solar_use)
-    ev_total = np.sum(ev_charge)
     grid_total = np.sum(grid_import)
     costo = np.sum(grid_import * precio)
     pico = np.max(grid_import)
     autoconsumo = solar_total / np.sum(solar_generation) * 100 if np.sum(solar_generation) > 0 else 0
     return {
         'solar_util': autoconsumo,
-        'ev_optimizado': (1 - np.sum(ev_charge * precio) / np.sum(no_control_ev_charge * precio)) * 100 if np.sum(no_control_ev_charge) > 0 else 0,
+        'ev_optimizado': ((1 - np.sum(ev_charge * precio) / np.sum(no_control_ev_charge * precio)) * 100
+                          if np.sum(no_control_ev_charge) > 0 else 0),
         'costo': costo,
         'pico': pico,
         'grid_import': grid_total
     }
 
-metricas_no_control = calcular_metricas(no_control_solar_use, no_control_ev_charge, no_control_grid_import, precio_electricidad)
+
+metricas_no_control = calcular_metricas(no_control_solar_use, no_control_ev_charge,
+                                        no_control_grid_import, precio_electricidad)
 metricas_marlisa = calcular_metricas(marlisa_solar_use, marlisa_ev_charge, marlisa_grid_import, precio_electricidad)
 metricas_maddpg = calcular_metricas(maddpg_solar_use, maddpg_ev_charge, maddpg_grid_import, precio_electricidad)
 
@@ -96,8 +101,8 @@ metricas_maddpg = calcular_metricas(maddpg_solar_use, maddpg_ev_charge, maddpg_g
 # FIGURA PRINCIPAL: OPTIMIZACIÓN FV Y CARGA VE
 # =============================================================================
 fig = plt.figure(figsize=(18, 14))
-fig.suptitle(f'{TITULO_PROYECTO}\nOptimización de Energía Fotovoltaica y Carga de Vehículos Eléctricos', 
-              fontsize=14, fontweight='bold')
+fig.suptitle(f'{TITULO_PROYECTO}\nOptimización de Energía Fotovoltaica y Carga de Vehículos Eléctricos',
+             fontsize=14, fontweight='bold')
 
 gs = gridspec.GridSpec(3, 3, figure=fig, hspace=0.35, wspace=0.3)
 
@@ -107,11 +112,11 @@ gs = gridspec.GridSpec(3, 3, figure=fig, hspace=0.35, wspace=0.3)
 ax1 = fig.add_subplot(gs[0, :2])
 
 ax1.fill_between(horas, solar_generation * 100, alpha=0.3, color='#f1c40f', label='Generación FV disponible')
-ax1.plot(horas, no_control_solar_use * 100, 'o--', color='#95a5a6', linewidth=2, 
+ax1.plot(horas, no_control_solar_use * 100, 'o--', color='#95a5a6', linewidth=2,
          markersize=5, label=f'No Control ({metricas_no_control["solar_util"]:.0f}%)')
-ax1.plot(horas, marlisa_solar_use * 100, 's-', color='#3498db', linewidth=2.5, 
+ax1.plot(horas, marlisa_solar_use * 100, 's-', color='#3498db', linewidth=2.5,
          markersize=6, label=f'MARLISA ({metricas_marlisa["solar_util"]:.0f}%)')
-ax1.plot(horas, maddpg_solar_use * 100, 'o-', color='#27ae60', linewidth=2.5, 
+ax1.plot(horas, maddpg_solar_use * 100, 'o-', color='#27ae60', linewidth=2.5,
          markersize=6, label=f'MADDPG ({metricas_maddpg["solar_util"]:.0f}%)')
 
 ax1.set_xlabel('Hora del día', fontsize=11)
@@ -143,7 +148,7 @@ ax2.set_ylim(0, 110)
 ax2.grid(True, alpha=0.3, axis='y')
 
 for bar, val in zip(bars, solar_util):
-    ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 2, 
+    ax2.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 2,
              f'{val:.0f}%', ha='center', va='bottom', fontsize=12, fontweight='bold')
 
 # =============================================================================
@@ -160,11 +165,11 @@ ax3_twin.tick_params(axis='y', labelcolor='red')
 ax3_twin.set_ylim(0, 35)
 
 # Perfiles de carga VE
-ax3.plot(horas, no_control_ev_charge * 100, 'o--', color='#95a5a6', linewidth=2, 
+ax3.plot(horas, no_control_ev_charge * 100, 'o--', color='#95a5a6', linewidth=2,
          markersize=5, label='No Control (pico)')
-ax3.plot(horas, marlisa_ev_charge * 100, 's-', color='#3498db', linewidth=2.5, 
+ax3.plot(horas, marlisa_ev_charge * 100, 's-', color='#3498db', linewidth=2.5,
          markersize=6, label='MARLISA (valley-filling)')
-ax3.plot(horas, maddpg_ev_charge * 100, 'o-', color='#27ae60', linewidth=2.5, 
+ax3.plot(horas, maddpg_ev_charge * 100, 'o-', color='#27ae60', linewidth=2.5,
          markersize=6, label='MADDPG (óptimo)')
 
 ax3.set_xlabel('Hora del día', fontsize=11)
@@ -201,7 +206,7 @@ ax4.grid(True, alpha=0.3, axis='y')
 ax4.set_ylim(0, 50)
 
 for bar, val in zip(bars, ahorros):
-    ax4.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1, 
+    ax4.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1,
              f'{val:.0f}%', ha='center', va='bottom', fontsize=12, fontweight='bold')
 
 # =============================================================================
@@ -227,7 +232,7 @@ ax5.grid(True, alpha=0.3)
 ax6 = fig.add_subplot(gs[2, 1])
 
 picos = [metricas_no_control['pico'] * 100, metricas_marlisa['pico'] * 100, metricas_maddpg['pico'] * 100]
-reduccion_pico = [(1 - p/picos[0]) * 100 for p in picos]
+reduccion_pico = [(1 - p / picos[0]) * 100 for p in picos]
 
 bars = ax6.bar(metodos, picos, color=colores, edgecolor='black', alpha=0.85)
 ax6.axhline(y=picos[0], color='red', linestyle='--', linewidth=2, alpha=0.5)
@@ -237,8 +242,8 @@ ax6.grid(True, alpha=0.3, axis='y')
 
 for bar, val, red in zip(bars, picos, reduccion_pico):
     color_text = '#27ae60' if red > 0 else 'black'
-    ax6.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1, 
-             f'{val:.0f}%\n({red:+.0f}%)', ha='center', va='bottom', 
+    ax6.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1,
+             f'{val:.0f}%\n({red:+.0f}%)', ha='center', va='bottom',
              fontsize=10, fontweight='bold', color=color_text)
 
 # =============================================================================
@@ -255,8 +260,10 @@ resumen = f"""
 ║  APROVECHAMIENTO FOTOVOLTAICO (FV):                ║
 ║  ─────────────────────────────────                 ║
 ║  • No Control:  {metricas_no_control['solar_util']:.0f}% autoconsumo              ║
-║  • MARLISA:     {metricas_marlisa['solar_util']:.0f}% autoconsumo (+{metricas_marlisa['solar_util']-metricas_no_control['solar_util']:.0f}%)          ║
-║  • MADDPG:      {metricas_maddpg['solar_util']:.0f}% autoconsumo (+{metricas_maddpg['solar_util']-metricas_no_control['solar_util']:.0f}%)          ║
+║  • MARLISA:     {metricas_marlisa['solar_util']:.0f}% autoconsumo               ║
+║                 (+{metricas_marlisa['solar_util'] - metricas_no_control['solar_util']:.0f}%)      ║
+║  • MADDPG:      {metricas_maddpg['solar_util']:.0f}% autoconsumo                ║
+║                 (+{metricas_maddpg['solar_util'] - metricas_no_control['solar_util']:.0f}%)      ║
 ║                                                    ║
 ║  OPTIMIZACIÓN CARGA VE:                            ║
 ║  ─────────────────────────────────                 ║
@@ -275,7 +282,7 @@ resumen = f"""
 
 ax7.text(0.5, 0.5, resumen, transform=ax7.transAxes, fontsize=10,
          verticalalignment='center', horizontalalignment='center',
-         fontfamily='monospace', bbox=dict(boxstyle='round', facecolor='#e8f6f3', 
+         fontfamily='monospace', bbox=dict(boxstyle='round', facecolor='#e8f6f3',
                                            edgecolor='#1abc9c', linewidth=2))
 
 plt.savefig(os.path.join(OUTPUT_DIR, 'optimizacion_fv_ve.png'), dpi=150, bbox_inches='tight')
@@ -286,7 +293,7 @@ print("✅ optimizacion_fv_ve.png")
 # FIGURA 2: COMPARACIÓN DETALLADA MADDPG vs MARLISA
 # =============================================================================
 fig2, axes = plt.subplots(2, 2, figsize=(14, 10))
-fig2.suptitle(f'{TITULO_PROYECTO}\nComparación Detallada: MADDPG vs MARLISA en Optimización FV y VE', 
+fig2.suptitle(f'{TITULO_PROYECTO}\nComparación Detallada: MADDPG vs MARLISA en Optimización FV y VE',
               fontsize=13, fontweight='bold')
 
 # 2.1 Perfil combinado FV + VE para MADDPG
@@ -335,7 +342,7 @@ ax_polar = fig2.add_subplot(2, 2, 4, projection='polar')
 axes[1, 1].remove()
 
 categories = ['Uso FV', 'Ahorro VE', 'Reducción\nPico', 'Costo\nTotal', 'Flexibilidad']
-angles = np.linspace(0, 2*np.pi, len(categories), endpoint=False).tolist()
+angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
 angles += angles[:1]
 
 # Normalizar valores (0-1, mayor = mejor)
@@ -376,7 +383,6 @@ print("✅ maddpg_vs_marlisa_fv_ve.png")
 # =============================================================================
 # COPIAR A STATIC/IMAGES
 # =============================================================================
-import shutil
 static_dir = "static/images"
 
 for filename in ['optimizacion_fv_ve.png', 'maddpg_vs_marlisa_fv_ve.png']:
@@ -392,6 +398,10 @@ print("\n" + "=" * 70)
 print("📊 RESUMEN: OPTIMIZACIÓN FV Y CARGA VE")
 print("=" * 70)
 
+# Calculate differences for solar utilization
+marlisa_solar_diff = metricas_marlisa['solar_util'] - metricas_no_control['solar_util']
+maddpg_solar_diff = metricas_maddpg['solar_util'] - metricas_no_control['solar_util']
+
 print(f"""
 ┌──────────────────────────────────────────────────────────────────┐
 │                 APROVECHAMIENTO FOTOVOLTAICO                     │
@@ -399,8 +409,12 @@ print(f"""
 │  Método        │  Autoconsumo  │  Mejora vs Baseline             │
 ├──────────────────────────────────────────────────────────────────┤
 │  No Control    │     {metricas_no_control['solar_util']:.0f}%       │      -                          │
-│  MARLISA       │     {metricas_marlisa['solar_util']:.0f}%       │    +{metricas_marlisa['solar_util']-metricas_no_control['solar_util']:.0f}%                        │
-│  MADDPG        │     {metricas_maddpg['solar_util']:.0f}%       │    +{metricas_maddpg['solar_util']-metricas_no_control['solar_util']:.0f}%                        │
+│  MARLISA       │     {metricas_marlisa['solar_util']:.0f}%       │                                 │
+│                │               │                                 │
+│                │               │    +{marlisa_solar_diff:.0f}%                      │
+│  MADDPG        │     {metricas_maddpg['solar_util']:.0f}%       │                                 │
+│                │               │                                 │
+│                │               │    +{maddpg_solar_diff:.0f}%                      │
 └──────────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────────┐

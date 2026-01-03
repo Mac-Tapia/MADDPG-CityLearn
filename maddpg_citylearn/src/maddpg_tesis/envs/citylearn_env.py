@@ -183,31 +183,31 @@ class CityLearnMultiAgentEnv:
             return np.full(self.n_agents, default, dtype=np.float32)
 
         w = self.reward_weights or {}
-        
+
         # Métricas básicas
         cost = get_arr(["electricity_costs", "costs", "total_cost"], 0.0)
         co2 = get_arr(["carbon_emissions", "emissions"], 0.0)
         discomfort = get_arr(["discomfort"], 0.0)
         peak = get_arr(["peak_demand", "peak_net_electricity_consumption"], 0.0)
-        
+
         # Métricas avanzadas para FV y VE
         solar_gen = get_arr(["solar_generation", "pv_generation", "renewable_generation"], 0.0)
         net_consumption = get_arr(["net_electricity_consumption", "electricity_consumption"], 0.0)
         ev_consumption = get_arr(["ev_consumption", "electric_vehicle_consumption"], 0.0)
-        grid_import = get_arr(["grid_import", "electricity_import"], 0.0)
-        
+        # grid_import = get_arr(["grid_import", "electricity_import"], 0.0)  # noqa: F841
+
         # Recompensa base
         custom = base_reward.copy()
-        
+
         # 1. VALLEY-FILLING: Penalizar picos, bonificar carga distribuida
         # Cuanto menor el pico, mejor (valley-filling exitoso)
         custom -= w.get("peak", 2.5) * peak
-        
+
         # Bonus por mantener consumo estable (baja varianza = valley-filling)
         if net_consumption.std() > 0:
             stability_bonus = 1.0 / (1.0 + net_consumption.std())
             custom += w.get("valley_bonus", 1.5) * stability_bonus
-        
+
         # 2. AUTOCONSUMO FV: Maximizar uso de generación solar
         # Penalizar importar de red cuando hay solar disponible
         solar_total = np.sum(solar_gen)
@@ -216,26 +216,26 @@ class CityLearnMultiAgentEnv:
             solar_wasted = np.maximum(0, solar_gen - net_consumption)
             solar_penalty = np.sum(solar_wasted) / (solar_total + 1e-6)
             custom -= w.get("solar_penalty", 1.5) * solar_penalty
-            
+
             # Bonus por usar solar (reducir grid import cuando hay sol)
             autoconsumo_ratio = np.minimum(1.0, net_consumption / (solar_gen + 1e-6))
             custom += w.get("solar_penalty", 1.5) * np.mean(autoconsumo_ratio)
-        
+
         # 3. AHORRO EN CARGA VE: Cargar en horas baratas/solares
         # Penalizar carga VE durante picos de demanda o precios altos
         if np.sum(ev_consumption) > 0:
             # Penalizar carga VE cuando hay pico de red
             ev_peak_penalty = ev_consumption * peak
             custom -= w.get("ev_cost", 2.0) * np.mean(ev_peak_penalty)
-            
+
             # Bonus por cargar VE con solar
             if solar_total > 0:
                 ev_solar_sync = np.minimum(ev_consumption, solar_gen)
                 custom += w.get("ev_cost", 2.0) * np.mean(ev_solar_sync) / (np.mean(ev_consumption) + 1e-6)
-        
+
         # Penalizaciones básicas
         custom -= w.get("cost", 2.0) * cost
         custom -= w.get("co2", 1.5) * co2
         custom -= w.get("discomfort", 0.1) * discomfort
-        
+
         return custom

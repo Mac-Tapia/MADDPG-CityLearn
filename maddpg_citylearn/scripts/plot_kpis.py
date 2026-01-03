@@ -27,7 +27,8 @@ print(f"KPIs distrito: {len(district_kpis)}")
 
 # 1. GRÁFICA DE KPIs PRINCIPALES DEL DISTRITO
 fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-fig.suptitle('Sistema Multi-Agente MADDPG para Optimización de Flexibilidad Energética\nKPIs de CityLearn', fontsize=14, fontweight='bold')
+fig.suptitle('Sistema Multi-Agente MADDPG para Optimización de Flexibilidad Energética\n'
+             'KPIs de CityLearn', fontsize=14, fontweight='bold')
 
 # KPIs principales a mostrar
 main_kpis = {
@@ -67,7 +68,7 @@ for bar, val in zip(bars, values):
     width = bar.get_width()
     pct = (1 - val) * 100
     label = f'{val:.3f} ({pct:+.1f}%)'
-    ax1.text(width + 0.02, bar.get_y() + bar.get_height()/2, label,
+    ax1.text(width + 0.02, bar.get_y() + bar.get_height() / 2, label,
              ha='left', va='center', fontsize=10, fontweight='bold')
 
 ax1.set_xlim(0, max(values) * 1.3)
@@ -94,17 +95,17 @@ if flex_values:
     names2 = [flex_kpis[k] for k in flex_values.keys()]
     values2 = list(flex_values.values())
     colors2 = ['green' if v < 1.0 else 'orange' if v == 1.0 else 'coral' for v in values2]
-    
+
     bars2 = ax2.barh(names2, values2, color=colors2, edgecolor='black', alpha=0.8)
     ax2.axvline(x=1.0, color='black', linestyle='--', linewidth=2, label='Baseline')
     ax2.set_xlabel('Valor (1.0 = Baseline)', fontsize=12)
     ax2.set_title('KPIs de Flexibilidad Energética', fontsize=14)
     ax2.legend()
-    
+
     for bar, val in zip(bars2, values2):
         width = bar.get_width()
         pct = (1 - val) * 100
-        ax2.text(width + 0.02, bar.get_y() + bar.get_height()/2, f'{val:.3f}',
+        ax2.text(width + 0.02, bar.get_y() + bar.get_height() / 2, f'{val:.3f}',
                  ha='left', va='center', fontsize=10)
     ax2.set_xlim(0, max(values2) * 1.3)
     ax2.grid(True, alpha=0.3, axis='x')
@@ -116,25 +117,25 @@ if baselines:
     methods = list(baselines.keys())
     baseline_rewards = [baselines[m].get('mean_reward', 0) for m in methods]
     maddpg_reward = np.mean(history['mean_rewards'])
-    
+
     all_methods = methods + ['MADDPG']
     all_rewards = baseline_rewards + [maddpg_reward]
-    
+
     colors3 = ['#e74c3c' if r < 0 else '#95a5a6' for r in baseline_rewards] + ['#27ae60']
-    
+
     bars3 = ax3.bar(all_methods, all_rewards, color=colors3, edgecolor='black', alpha=0.8)
     ax3.axhline(y=0, color='black', linestyle='-', linewidth=1)
     ax3.set_ylabel('Reward Medio', fontsize=12)
     ax3.set_title('Comparación: MADDPG vs Baselines', fontsize=14)
     ax3.tick_params(axis='x', rotation=20)
-    
+
     # Valores en barras
     for bar, val in zip(bars3, all_rewards):
         height = bar.get_height()
         y_pos = height + 200 if height >= 0 else height - 500
-        ax3.text(bar.get_x() + bar.get_width()/2, y_pos, f'{val:,.0f}',
+        ax3.text(bar.get_x() + bar.get_width() / 2, y_pos, f'{val:,.0f}',
                  ha='center', va='bottom' if height >= 0 else 'top', fontsize=10, fontweight='bold')
-    
+
     ax3.grid(True, alpha=0.3, axis='y')
 
 # Subplot 4: Progreso del entrenamiento
@@ -144,7 +145,7 @@ rewards = history['mean_rewards']
 
 ax4.plot(episodes, rewards, 'b-o', linewidth=2, markersize=10, label='MADDPG')
 ax4.fill_between(episodes, rewards, alpha=0.3)
-ax4.axhline(y=np.mean(rewards), color='r', linestyle='--', linewidth=2, 
+ax4.axhline(y=np.mean(rewards), color='r', linestyle='--', linewidth=2,
             label=f'Media: {np.mean(rewards):,.0f}')
 
 # Añadir baselines como líneas de referencia
@@ -153,8 +154,8 @@ if baselines:
     for i, (name, data) in enumerate(baselines.items()):
         bl_reward = data.get('mean_reward', 0)
         if bl_reward > -2000:  # Solo mostrar baselines razonables
-            ax4.axhline(y=bl_reward, color=colors_bl[i % len(colors_bl)], 
-                       linestyle=':', alpha=0.7, label=f'{name}: {bl_reward:,.0f}')
+            ax4.axhline(y=bl_reward, color=colors_bl[i % len(colors_bl)],
+                        linestyle=':', alpha=0.7, label=f'{name}: {bl_reward:,.0f}')
 
 ax4.set_xlabel('Episodio', fontsize=12)
 ax4.set_ylabel('Reward Medio', fontsize=12)
@@ -169,7 +170,8 @@ print(f"\n✅ Gráfica guardada: {os.path.join(REPORTS_DIR, 'kpis_completos.png'
 
 # 2. GRÁFICA DETALLADA DE KPIs POR EDIFICIO
 fig2, axes2 = plt.subplots(2, 2, figsize=(16, 12))
-fig2.suptitle('Sistema Multi-Agente MADDPG - Comunidades Interactivas de Redes Eléctricas\nKPIs por Edificio', fontsize=14, fontweight='bold')
+fig2.suptitle('Sistema Multi-Agente MADDPG - Comunidades Interactivas de Redes Eléctricas\n'
+              'KPIs por Edificio', fontsize=14, fontweight='bold')
 
 # Filtrar KPIs por edificio
 building_kpis = [k for k in kpis if k.get('level') == 'building']
@@ -202,7 +204,7 @@ if valid_costs:
     ax2_1.set_ylabel('Costo Total (ratio)', fontsize=12)
     ax2_1.set_title('Costo Total por Edificio', fontsize=14)
     ax2_1.set_xticks(x_pos)
-    ax2_1.set_xticklabels([f'B{i+1}' for i in range(len(building_names))], rotation=45)
+    ax2_1.set_xticklabels([f'B{i + 1}' for i in range(len(building_names))], rotation=45)
     ax2_1.legend()
     ax2_1.grid(True, alpha=0.3, axis='y')
 
@@ -222,7 +224,7 @@ if valid_co2:
     ax2_2.set_ylabel('Emisiones CO₂ (ratio)', fontsize=12)
     ax2_2.set_title('Emisiones CO₂ por Edificio', fontsize=14)
     ax2_2.set_xticks(x_pos)
-    ax2_2.set_xticklabels([f'B{i+1}' for i in range(len(building_names))], rotation=45)
+    ax2_2.set_xticklabels([f'B{i + 1}' for i in range(len(building_names))], rotation=45)
     ax2_2.legend()
     ax2_2.grid(True, alpha=0.3, axis='y')
 
@@ -242,7 +244,7 @@ if valid_peak:
     ax2_3.set_ylabel('Pico Diario (ratio)', fontsize=12)
     ax2_3.set_title('Peak Shaving por Edificio', fontsize=14)
     ax2_3.set_xticks(x_pos)
-    ax2_3.set_xticklabels([f'B{i+1}' for i in range(len(building_names))], rotation=45)
+    ax2_3.set_xticklabels([f'B{i + 1}' for i in range(len(building_names))], rotation=45)
     ax2_3.legend()
     ax2_3.grid(True, alpha=0.3, axis='y')
 
@@ -265,7 +267,7 @@ ax2_4.set_title('Resumen de Mejoras (Nivel Distrito)', fontsize=14)
 
 for bar, val in zip(bars_mejora, mejoras):
     height = bar.get_height()
-    ax2_4.text(bar.get_x() + bar.get_width()/2, height + 0.5, f'{val:+.1f}%',
+    ax2_4.text(bar.get_x() + bar.get_width() / 2, height + 0.5, f'{val:+.1f}%',
                ha='center', va='bottom', fontsize=12, fontweight='bold')
 
 ax2_4.grid(True, alpha=0.3, axis='y')
@@ -291,5 +293,5 @@ for kpi_name, display_name in main_kpis.items():
 print("-" * 70)
 
 print("\n🎉 Gráficas generadas correctamente!")
-print(f"   - kpis_completos.png")
-print(f"   - kpis_por_edificio.png")
+print("   - kpis_completos.png")
+print("   - kpis_por_edificio.png")

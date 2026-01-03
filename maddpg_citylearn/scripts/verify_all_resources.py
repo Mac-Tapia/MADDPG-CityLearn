@@ -43,9 +43,9 @@ def verify_all_resources():
     print("=" * 80)
 
     for i, building in enumerate(env.buildings):
-        print(f"\n{'='*60}")
-        print(f"Building_{i+1} (ID: {i})")
-        print(f"{'='*60}")
+        print(f"\n{'=' * 60}")
+        print(f"Building_{i + 1} (ID: {i})")
+        print(f"{'=' * 60}")
 
         # 1. SOLAR PV
         if hasattr(building, "pv") and building.pv is not None:
@@ -54,7 +54,7 @@ def verify_all_resources():
             capacidades["solar_pv"].append(nominal_power)
             print(f"  ☀️  Solar PV: ✅ {nominal_power:.1f} kW")
         else:
-            print(f"  ☀️  Solar PV: ❌")
+            print("  ☀️  Solar PV: ❌")
 
         # 2. BATTERY (electrical_storage)
         if (
@@ -66,7 +66,7 @@ def verify_all_resources():
             capacidades["battery"].append(capacity)
             print(f"  🔋 Batería: ✅ {capacity:.1f} kWh")
         else:
-            print(f"  🔋 Batería: ❌")
+            print("  🔋 Batería: ❌")
 
         # 3. COOLING STORAGE
         if (
@@ -78,7 +78,7 @@ def verify_all_resources():
             capacidades["cooling"].append(capacity)
             print(f"  ❄️  Cooling Storage: ✅ {capacity:.1f} kWh")
         else:
-            print(f"  ❄️  Cooling Storage: ❌")
+            print("  ❄️  Cooling Storage: ❌")
 
         # 4. HEATING STORAGE
         if (
@@ -90,7 +90,7 @@ def verify_all_resources():
             capacidades["heating"].append(capacity)
             print(f"  🔥 Heating Storage: ✅ {capacity:.1f} kWh")
         else:
-            print(f"  🔥 Heating Storage: ❌")
+            print("  🔥 Heating Storage: ❌")
 
         # 5. DHW STORAGE
         if (
@@ -102,7 +102,7 @@ def verify_all_resources():
             capacidades["dhw"].append(capacity)
             print(f"  🚿 DHW Storage: ✅ {capacity:.1f} kWh")
         else:
-            print(f"  🚿 DHW Storage: ❌")
+            print("  🚿 DHW Storage: ❌")
 
         # 6. EV CHARGERS (desde action_metadata)
         action_names = building.action_metadata.keys()
@@ -113,23 +113,23 @@ def verify_all_resources():
             for ev in ev_chargers:
                 print(f"      └─ {ev}")
         else:
-            print(f"  🚗 EV Chargers: ❌")
+            print("  🚗 EV Chargers: ❌")
 
         # 7. WASHING MACHINE
         washing = [a for a in action_names if "washing_machine" in a]
         if washing:
             recursos["washing_machine"] += 1
-            print(f"  🧺 Washing Machine: ✅")
+            print("  🧺 Washing Machine: ✅")
         else:
-            print(f"  🧺 Washing Machine: ❌")
+            print("  🧺 Washing Machine: ❌")
 
         # 8. DISHWASHER
         dishwasher = [a for a in action_names if "dishwasher" in a]
         if dishwasher:
             recursos["dishwasher"] += 1
-            print(f"  🍽️  Dishwasher: ✅")
+            print("  🍽️  Dishwasher: ✅")
         else:
-            print(f"  🍽️  Dishwasher: ❌")
+            print("  🍽️  Dishwasher: ❌")
 
         # 9. OTRAS ACCIONES
         other_actions = [
@@ -167,56 +167,64 @@ def verify_all_resources():
     total_buildings = len(env.buildings)
 
     print(
-        f"\n1. ☀️  Solar PV: {recursos['solar_generation']}/{total_buildings} edificios ({recursos['solar_generation']/total_buildings*100:.0f}%)"
-    )
+        f"\n1. ☀️  Solar PV: {
+            recursos['solar_generation']}/{total_buildings} edificios ({
+            recursos['solar_generation'] / total_buildings * 100:.0f}%)")
     if capacidades["solar_pv"]:
         print(
             f"   └─ Capacidad: {min(capacidades['solar_pv']):.1f} - {max(capacidades['solar_pv']):.1f} kW"
         )
 
     print(
-        f"\n2. 🔋 Batería Eléctrica: {recursos['electrical_storage']}/{total_buildings} edificios ({recursos['electrical_storage']/total_buildings*100:.0f}%)"
-    )
+        f"\n2. 🔋 Batería Eléctrica: {
+            recursos['electrical_storage']}/{total_buildings} edificios ({
+            recursos['electrical_storage'] / total_buildings * 100:.0f}%)")
     if capacidades["battery"]:
         print(
             f"   └─ Capacidad: {min(capacidades['battery']):.1f} - {max(capacidades['battery']):.1f} kWh"
         )
 
     print(
-        f"\n3. ❄️  Cooling Storage: {recursos['cooling_storage']}/{total_buildings} edificios ({recursos['cooling_storage']/total_buildings*100:.0f}%)"
-    )
+        f"\n3. ❄️  Cooling Storage: {
+            recursos['cooling_storage']}/{total_buildings} edificios ({
+            recursos['cooling_storage'] / total_buildings * 100:.0f}%)")
     if capacidades["cooling"]:
         print(
             f"   └─ Capacidad: {min(capacidades['cooling']):.1f} - {max(capacidades['cooling']):.1f} kWh"
         )
 
     print(
-        f"\n4. 🔥 Heating Storage: {recursos['heating_storage']}/{total_buildings} edificios ({recursos['heating_storage']/total_buildings*100:.0f}%)"
-    )
+        f"\n4. 🔥 Heating Storage: {
+            recursos['heating_storage']}/{total_buildings} edificios ({
+            recursos['heating_storage'] / total_buildings * 100:.0f}%)")
     if capacidades["heating"]:
         print(
             f"   └─ Capacidad: {min(capacidades['heating']):.1f} - {max(capacidades['heating']):.1f} kWh"
         )
 
     print(
-        f"\n5. 🚿 DHW Storage: {recursos['dhw_storage']}/{total_buildings} edificios ({recursos['dhw_storage']/total_buildings*100:.0f}%)"
-    )
+        f"\n5. 🚿 DHW Storage: {
+            recursos['dhw_storage']}/{total_buildings} edificios ({
+            recursos['dhw_storage'] / total_buildings * 100:.0f}%)")
     if capacidades["dhw"]:
         print(
             f"   └─ Capacidad: {min(capacidades['dhw']):.1f} - {max(capacidades['dhw']):.1f} kWh"
         )
 
     print(
-        f"\n6. 🚗 EV Chargers: {recursos['ev_charger']}/{total_buildings} edificios ({recursos['ev_charger']/total_buildings*100:.0f}%)"
-    )
+        f"\n6. 🚗 EV Chargers: {
+            recursos['ev_charger']}/{total_buildings} edificios ({
+            recursos['ev_charger'] / total_buildings * 100:.0f}%)")
 
     print(
-        f"\n7. 🧺 Washing Machines: {recursos['washing_machine']}/{total_buildings} edificios ({recursos['washing_machine']/total_buildings*100:.0f}%)"
-    )
+        f"\n7. 🧺 Washing Machines: {
+            recursos['washing_machine']}/{total_buildings} edificios ({
+            recursos['washing_machine'] / total_buildings * 100:.0f}%)")
 
     print(
-        f"\n8. 🍽️  Dishwashers: {recursos['dishwasher']}/{total_buildings} edificios ({recursos['dishwasher']/total_buildings*100:.0f}%)"
-    )
+        f"\n8. 🍽️  Dishwashers: {
+            recursos['dishwasher']}/{total_buildings} edificios ({
+            recursos['dishwasher'] / total_buildings * 100:.0f}%)")
 
     if recursos["other_appliances"] > 0:
         print(
@@ -239,14 +247,17 @@ def verify_all_resources():
         f"   • EV Chargers: {recursos['ev_charger']}/{total_buildings} ✅ Cargas flexibles"
     )
     print(
-        f"   • Cooling Storage: {recursos['cooling_storage']}/{total_buildings} {'✅' if recursos['cooling_storage'] > 0 else '❌'} Flexibilidad térmica"
-    )
+        f"   • Cooling Storage: {
+            recursos['cooling_storage']}/{total_buildings} {
+            '✅' if recursos['cooling_storage'] > 0 else '❌'} Flexibilidad térmica")
     print(
-        f"   • DHW Storage: {recursos['dhw_storage']}/{total_buildings} {'✅' if recursos['dhw_storage'] > 0 else '❌'} Flexibilidad térmica"
-    )
+        f"   • DHW Storage: {
+            recursos['dhw_storage']}/{total_buildings} {
+            '✅' if recursos['dhw_storage'] > 0 else '❌'} Flexibilidad térmica")
     print(
-        f"   • Washing Machines: {recursos['washing_machine']}/{total_buildings} {'✅' if recursos['washing_machine'] > 0 else '❌'} Cargas diferibles"
-    )
+        f"   • Washing Machines: {
+            recursos['washing_machine']}/{total_buildings} {
+            '✅' if recursos['washing_machine'] > 0 else '❌'} Cargas diferibles")
 
     print("\n📋 CLASIFICACIÓN DE FLEXIBILIDAD:")
     print("   1. Flexibilidad Eléctrica (Storage):")
@@ -255,8 +266,9 @@ def verify_all_resources():
     print(f"      └─ Solar PV: {recursos['solar_generation']}/17 ✅ CORE")
     print("   3. Flexibilidad de Carga (Demand Response):")
     print(f"      └─ EV Chargers: {recursos['ev_charger']}/17 ✅ CORE")
+    wash_status = '✅ BONUS' if recursos['washing_machine'] > 0 else '❌ NO'
     print(
-        f"      └─ Washing Machines: {recursos['washing_machine']}/17 {'✅ BONUS' if recursos['washing_machine'] > 0 else '❌ NO'}"
+        f"      └─ Washing Machines: {recursos['washing_machine']}/17 {wash_status}"
     )
     print("   4. Flexibilidad Térmica:")
     print(
@@ -278,10 +290,10 @@ def verify_all_resources():
     print(
         f"   Recursos CORE de flexibilidad: {core_resources}/51 posibles (17×3)"
     )
-    print(f"   └─ Solar: 17/17 ✅")
-    print(f"   └─ Batería: 17/17 ✅")
-    print(f"   └─ EV: 7/17 ✅")
-    print(f"\n   Dataset VÁLIDO para tesis MADRL control de flexibilidad ✅")
+    print("   └─ Solar: 17/17 ✅")
+    print("   └─ Batería: 17/17 ✅")
+    print("   └─ EV: 7/17 ✅")
+    print("\n   Dataset VÁLIDO para tesis MADRL control de flexibilidad ✅")
 
     return recursos
 

@@ -79,7 +79,7 @@ def validate_target_schema():
         # Información sobre edificios
         print("\nEdificios en la comunidad:")
         for i, building in enumerate(env.buildings):
-            print(f"  {i+1}. {building.name}")
+            print(f"  {i + 1}. {building.name}")
 
         # Verificar si tiene EVs
         has_evs = any(

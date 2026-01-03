@@ -1,14 +1,11 @@
 """
 Tests para los componentes core del proyecto
 """
-import pytest
-import numpy as np
 
 
 def test_config_loading():
     """Test loading configuration"""
-    from maddpg_tesis.core.config import (
-        ProjectConfig,
+    from maddpg_tesis.core.config import (  # noqa: F401
         MADDPGConfig,
         EnvConfig,
         TrainingConfig,

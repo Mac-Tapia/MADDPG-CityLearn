@@ -23,7 +23,7 @@ def main():
     actions = env._env.action_space
     print("action space por agente:")
     for i, space in enumerate(actions):
-        print(f"  agent {i+1}: shape={space.shape}")
+        print(f"  agent {i + 1}: shape={space.shape}")
 
     # Step con acciones aleatorias del espacio original, padded a (n_agents, max_dim)
     max_dim = max(space.shape[0] for space in actions)

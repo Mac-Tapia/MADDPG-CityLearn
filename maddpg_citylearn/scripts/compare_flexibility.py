@@ -3,11 +3,11 @@ Comparación de Flexibilidad Energética: MADDPG vs Baselines vs MARLISA
 Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la
 Optimización de la Flexibilidad Energética en Comunidades Interactivas
 """
+import shutil
 import os
 import json
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
 import matplotlib.gridspec as gridspec
 
 # Configuración
@@ -149,7 +149,7 @@ for i, method in enumerate(methods_to_compare):
     values = [method['cost'], method['co2'], method['peak'], method['consumption']]
     # Limitar valores para visualización
     values = [min(v, 2.0) for v in values]
-    bars = ax1.bar(x + i*width, values, width, label=method['name'].replace('\n', ' '), 
+    bars = ax1.bar(x + i * width, values, width, label=method['name'].replace('\n', ' '),
                    color=method['color'], edgecolor='black', alpha=0.85)
 
 ax1.axhline(y=1.0, color='black', linestyle='--', linewidth=2, alpha=0.7, label='Baseline (1.0)')
@@ -177,7 +177,7 @@ x_rl = np.arange(len(methods_rl))
 width_rl = 0.25
 
 for i, (label, color) in enumerate([('Costo', '#2ecc71'), ('CO₂', '#3498db'), ('Peak', '#e74c3c')]):
-    ax2.bar(x_rl + i*width_rl, mejoras[:, i], width_rl, label=label, 
+    ax2.bar(x_rl + i * width_rl, mejoras[:, i], width_rl, label=label,
             color=color, edgecolor='black', alpha=0.8)
 
 ax2.axhline(y=0, color='black', linewidth=1)
@@ -191,16 +191,16 @@ ax2.grid(True, alpha=0.3, axis='y')
 # 1.3 Radar de flexibilidad energética
 ax3 = fig.add_subplot(gs[1, 0], projection='polar')
 categories = ['Costo', 'CO₂', 'Peak', 'Consumo', 'Ramping']
-angles = np.linspace(0, 2*np.pi, len(categories), endpoint=False).tolist()
+angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
 angles += angles[:1]
 
 for method in [NO_CONTROL, MARLISA, MADDPG]:
-    values = [method['cost'], method['co2'], method['peak'], 
+    values = [method['cost'], method['co2'], method['peak'],
               method['consumption'], method['ramping']]
     # Invertir para que menor sea mejor (más hacia afuera)
     values = [2 - v if v <= 2 else 0 for v in values]
     values += values[:1]
-    ax3.plot(angles, values, 'o-', linewidth=2, label=method['name'].replace('\n', ' '), 
+    ax3.plot(angles, values, 'o-', linewidth=2, label=method['name'].replace('\n', ' '),
              color=method['color'])
     ax3.fill(angles, values, alpha=0.15, color=method['color'])
 
@@ -225,7 +225,7 @@ ax4.grid(True, alpha=0.3, axis='x')
 
 for bar, val in zip(bars, rewards):
     x_pos = val + 100 if val >= 0 else val - 100
-    ax4.text(x_pos, bar.get_y() + bar.get_height()/2, f'{val:,.0f}',
+    ax4.text(x_pos, bar.get_y() + bar.get_height() / 2, f'{val:,.0f}',
              va='center', ha='left' if val >= 0 else 'right', fontsize=10, fontweight='bold')
 
 # 1.5 Eficiencia de entrenamiento
@@ -240,16 +240,16 @@ ax5.set_title('Eficiencia de Entrenamiento', fontsize=13)
 ax5.grid(True, alpha=0.3, axis='y')
 
 for bar, ep in zip(bars, episodes):
-    ax5.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1, f'{ep}',
+    ax5.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1, f'{ep}',
              ha='center', va='bottom', fontsize=12, fontweight='bold')
 
 # 1.6 Trade-off Costo vs Peak (scatter)
 ax6 = fig.add_subplot(gs[2, 0])
 for method in ALL_METHODS:
     if method['cost'] < 3.5 and method['peak'] < 4:
-        ax6.scatter(method['cost'], method['peak'], s=300, c=method['color'], 
-                   label=method['name'].replace('\n', ' '), edgecolors='black', 
-                   linewidths=2, alpha=0.85, zorder=5)
+        ax6.scatter(method['cost'], method['peak'], s=300, c=method['color'],
+                    label=method['name'].replace('\n', ' '), edgecolors='black',
+                    linewidths=2, alpha=0.85, zorder=5)
 
 ax6.axhline(y=1.0, color='gray', linestyle='--', alpha=0.5)
 ax6.axvline(x=1.0, color='gray', linestyle='--', alpha=0.5)
@@ -266,9 +266,9 @@ ax6.set_ylim(0.5, 4.0)
 ax7 = fig.add_subplot(gs[2, 1])
 for method in ALL_METHODS:
     if method['co2'] < 3.5 and method['consumption'] < 3.5:
-        ax7.scatter(method['co2'], method['consumption'], s=300, c=method['color'], 
-                   label=method['name'].replace('\n', ' '), edgecolors='black', 
-                   linewidths=2, alpha=0.85, zorder=5)
+        ax7.scatter(method['co2'], method['consumption'], s=300, c=method['color'],
+                    label=method['name'].replace('\n', ' '), edgecolors='black',
+                    linewidths=2, alpha=0.85, zorder=5)
 
 ax7.axhline(y=1.0, color='gray', linestyle='--', alpha=0.5)
 ax7.axvline(x=1.0, color='gray', linestyle='--', alpha=0.5)
@@ -292,13 +292,13 @@ table_data = [
     ['RBC', '2.530', '2.480', '3.550', '-6,351', '0'],
     ['SAC', '0.950', '0.960', '0.920', '7,200', '30'],
     ['MARLISA', '0.920', '0.940', '0.880', '9,500', '50'],
-    ['MADDPG', f'{MADDPG["cost"]:.3f}', f'{MADDPG["co2"]:.3f}', 
+    ['MADDPG', f'{MADDPG["cost"]:.3f}', f'{MADDPG["co2"]:.3f}',
      f'{MADDPG["peak"]:.3f}', f'{MADDPG["reward"]:,.0f}', str(MADDPG["episodes"])],
 ]
 
 # Dibujar tabla
-cell_colors = [['lightgray']*6, ['white']*6, ['#ffcccc']*6, 
-               ['#cce5ff']*6, ['#cce5ff']*6, ['#ccffcc']*6]
+cell_colors = [['lightgray'] * 6, ['white'] * 6, ['#ffcccc'] * 6,
+               ['#cce5ff'] * 6, ['#cce5ff'] * 6, ['#ccffcc'] * 6]
 table = ax8.table(cellText=table_data, cellColours=cell_colors,
                   loc='center', cellLoc='center',
                   colWidths=[0.22, 0.13, 0.13, 0.13, 0.18, 0.15])
@@ -308,7 +308,7 @@ table.scale(1.2, 1.8)
 ax8.set_title('Tabla Resumen de Métricas', fontsize=13, pad=20)
 
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, 'comparacion_flexibilidad_completa.png'), 
+plt.savefig(os.path.join(OUTPUT_DIR, 'comparacion_flexibilidad_completa.png'),
             dpi=150, bbox_inches='tight')
 plt.close()
 print("✅ comparacion_flexibilidad_completa.png")
@@ -324,17 +324,17 @@ fig2.suptitle('Sistema Multi-Agente MADDPG vs MARLISA\n'
 # 2.1 KPIs lado a lado
 ax = axes2[0, 0]
 kpis_compare = ['Costo', 'CO₂', 'Peak', 'Consumo', 'Ramping']
-maddpg_vals = [MADDPG['cost'], MADDPG['co2'], MADDPG['peak'], 
+maddpg_vals = [MADDPG['cost'], MADDPG['co2'], MADDPG['peak'],
                MADDPG['consumption'], MADDPG['ramping']]
-marlisa_vals = [MARLISA['cost'], MARLISA['co2'], MARLISA['peak'], 
+marlisa_vals = [MARLISA['cost'], MARLISA['co2'], MARLISA['peak'],
                 MARLISA['consumption'], MARLISA['ramping']]
 
 x = np.arange(len(kpis_compare))
 width = 0.35
 
-bars1 = ax.bar(x - width/2, maddpg_vals, width, label='MADDPG (Tesis)', 
+bars1 = ax.bar(x - width / 2, maddpg_vals, width, label='MADDPG (Tesis)',
                color='#27ae60', edgecolor='black')
-bars2 = ax.bar(x + width/2, marlisa_vals, width, label='MARLISA (CityLearn)', 
+bars2 = ax.bar(x + width / 2, marlisa_vals, width, label='MARLISA (CityLearn)',
                color='#3498db', edgecolor='black')
 
 ax.axhline(y=1.0, color='black', linestyle='--', linewidth=2, alpha=0.7)
@@ -350,7 +350,7 @@ ax.set_ylim(0, 1.6)
 for i, (m, l) in enumerate(zip(maddpg_vals, marlisa_vals)):
     diff = (m - l) / l * 100
     color = '#e74c3c' if diff > 0 else '#27ae60'
-    ax.annotate(f'{diff:+.1f}%', xy=(i, max(m, l) + 0.05), ha='center', 
+    ax.annotate(f'{diff:+.1f}%', xy=(i, max(m, l) + 0.05), ha='center',
                 fontsize=9, color=color, fontweight='bold')
 
 # 2.2 Radar comparativo
@@ -359,14 +359,14 @@ ax_polar = fig2.add_subplot(2, 2, 2, projection='polar')
 axes2[0, 1].remove()
 
 categories = ['Costo', 'CO₂', 'Peak', 'Consumo', 'Ramping']
-angles = np.linspace(0, 2*np.pi, len(categories), endpoint=False).tolist()
+angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
 angles += angles[:1]
 
 # Valores invertidos (menor original = mejor = mayor en radar)
-maddpg_radar = [1.5 - v for v in [MADDPG['cost'], MADDPG['co2'], MADDPG['peak'], 
-                                   MADDPG['consumption'], min(MADDPG['ramping'], 1.5)]]
-marlisa_radar = [1.5 - v for v in [MARLISA['cost'], MARLISA['co2'], MARLISA['peak'], 
-                                    MARLISA['consumption'], MARLISA['ramping']]]
+maddpg_radar = [1.5 - v for v in [MADDPG['cost'], MADDPG['co2'], MADDPG['peak'],
+                                  MADDPG['consumption'], min(MADDPG['ramping'], 1.5)]]
+marlisa_radar = [1.5 - v for v in [MARLISA['cost'], MARLISA['co2'], MARLISA['peak'],
+                                   MARLISA['consumption'], MARLISA['ramping']]]
 maddpg_radar += maddpg_radar[:1]
 marlisa_radar += marlisa_radar[:1]
 
@@ -385,7 +385,7 @@ ax_polar.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0))
 ax = axes2[1, 0]
 methods_eff = [SAC, MARLISA, MADDPG, NO_CONTROL]
 for m in methods_eff:
-    ax.scatter(m['episodes'] if m['episodes'] > 0 else 1, m['reward'], 
+    ax.scatter(m['episodes'] if m['episodes'] > 0 else 1, m['reward'],
                s=400, c=m['color'], label=m['name'].replace('\n', ' '),
                edgecolors='black', linewidths=2, zorder=5)
 
@@ -397,7 +397,7 @@ ax.grid(True, alpha=0.3)
 ax.set_xlim(-5, 60)
 
 # Añadir flechas de eficiencia
-ax.annotate('', xy=(MADDPG['episodes'], MADDPG['reward']), 
+ax.annotate('', xy=(MADDPG['episodes'], MADDPG['reward']),
             xytext=(MARLISA['episodes'], MARLISA['reward']),
             arrowprops=dict(arrowstyle='->', color='gray', lw=2))
 ax.text(30, 8500, 'MADDPG: 3x menos\nepisodios', fontsize=9, ha='center')
@@ -441,7 +441,7 @@ ax.text(0.5, 0.5, ventajas_text, transform=ax.transAxes, fontsize=10,
         fontfamily='monospace', bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
 
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, 'maddpg_vs_marlisa_detallado.png'), 
+plt.savefig(os.path.join(OUTPUT_DIR, 'maddpg_vs_marlisa_detallado.png'),
             dpi=150, bbox_inches='tight')
 plt.close()
 print("✅ maddpg_vs_marlisa_detallado.png")
@@ -470,7 +470,7 @@ ax.grid(True, alpha=0.3, axis='y')
 
 for bar, val in zip(bars, rewards):
     y_pos = val + 200 if val >= 0 else val - 400
-    ax.text(bar.get_x() + bar.get_width()/2, y_pos, f'{val:,.0f}',
+    ax.text(bar.get_x() + bar.get_width() / 2, y_pos, f'{val:,.0f}',
             ha='center', va='bottom' if val >= 0 else 'top', fontsize=11, fontweight='bold')
 
 # 3.2 Mejora porcentual
@@ -482,7 +482,7 @@ for m in [RANDOM, RBC, MADDPG]:
     mejoras_vs_baseline.append(mejora)
 
 colors_mejora = ['#e67e22', '#e74c3c', '#27ae60']
-bars = ax.bar(['Random', 'RBC', 'MADDPG'], mejoras_vs_baseline, 
+bars = ax.bar(['Random', 'RBC', 'MADDPG'], mejoras_vs_baseline,
               color=colors_mejora, edgecolor='black', alpha=0.85)
 ax.axhline(y=0, color='black', linewidth=1)
 ax.set_ylabel('Mejora vs No Control (%)', fontsize=11)
@@ -491,7 +491,7 @@ ax.grid(True, alpha=0.3, axis='y')
 
 for bar, val in zip(bars, mejoras_vs_baseline):
     y_pos = val + 20 if val >= 0 else val - 50
-    ax.text(bar.get_x() + bar.get_width()/2, y_pos, f'{val:+.0f}%',
+    ax.text(bar.get_x() + bar.get_width() / 2, y_pos, f'{val:+.0f}%',
             ha='center', va='bottom' if val >= 0 else 'top', fontsize=12, fontweight='bold')
 
 # 3.3 KPIs comparativos
@@ -502,7 +502,7 @@ width = 0.2
 
 for i, method in enumerate([NO_CONTROL, RANDOM, RBC, MADDPG]):
     values = [min(method['cost'], 4), min(method['co2'], 4), min(method['peak'], 4)]
-    ax.bar(x + i*width, values, width, label=method['name'].replace('\n', ' '), 
+    ax.bar(x + i * width, values, width, label=method['name'].replace('\n', ' '),
            color=method['color'], edgecolor='black', alpha=0.85)
 
 ax.axhline(y=1.0, color='black', linestyle='--', linewidth=2, alpha=0.7)
@@ -525,7 +525,7 @@ conclusion_text = """
 
   1. MADDPG supera ampliamente a todos los baselines:
      • vs No Control: +{:.0f}% en reward
-     • vs Random:     +{:.0f}% en reward  
+     • vs Random:     +{:.0f}% en reward
      • vs RBC:        +{:.0f}% en reward
 
   2. Mejoras en métricas de flexibilidad energética:
@@ -559,7 +559,7 @@ ax.text(0.5, 0.5, conclusion_text, transform=ax.transAxes, fontsize=11,
         fontfamily='monospace', bbox=dict(boxstyle='round', facecolor='lightcyan', alpha=0.8))
 
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, 'maddpg_vs_simples.png'), 
+plt.savefig(os.path.join(OUTPUT_DIR, 'maddpg_vs_simples.png'),
             dpi=150, bbox_inches='tight')
 plt.close()
 print("✅ maddpg_vs_simples.png")
@@ -567,10 +567,9 @@ print("✅ maddpg_vs_simples.png")
 # =============================================================================
 # COPIAR A static/images
 # =============================================================================
-import shutil
 static_dir = "static/images"
-for filename in ['comparacion_flexibilidad_completa.png', 
-                 'maddpg_vs_marlisa_detallado.png', 
+for filename in ['comparacion_flexibilidad_completa.png',
+                 'maddpg_vs_marlisa_detallado.png',
                  'maddpg_vs_simples.png']:
     src = os.path.join(OUTPUT_DIR, filename)
     dst = os.path.join(static_dir, filename)
@@ -591,15 +590,17 @@ print("│ Método       │  Costo   │   CO₂    │   Peak   │  Reward  �
 print("├──────────────┼──────────┼──────────┼──────────┼──────────┼──────────┤")
 for m in ALL_METHODS:
     name = m['name'].replace('\n', ' ')[:12]
-    print(f"│ {name:<12} │ {m['cost']:>8.3f} │ {m['co2']:>8.3f} │ {m['peak']:>8.3f} │ {m['reward']:>8,.0f} │ {m['episodes']:>8} │")
+    print(
+        f"│ {name:<12} │ {m['cost']:>8.3f} │ {m['co2']:>8.3f} │ "
+        f"{m['peak']:>8.3f} │ {m['reward']:>8,.0f} │ {m['episodes']:>8} │")
 print("└──────────────┴──────────┴──────────┴──────────┴──────────┴──────────┘")
 
-print(f"\n🏆 MADDPG Rendimiento:")
-print(f"   • Costo:    {(1-MADDPG['cost'])*100:+.1f}% vs baseline")
-print(f"   • CO₂:      {(1-MADDPG['co2'])*100:+.1f}% vs baseline")
-print(f"   • Peak:     {(1-MADDPG['peak'])*100:+.1f}% vs baseline")
-print(f"   • vs MARLISA: {(MADDPG['cost']-MARLISA['cost'])/MARLISA['cost']*100:+.1f}% costo, "
-      f"{(MADDPG['episodes']-MARLISA['episodes'])/MARLISA['episodes']*100:.0f}% menos episodios")
+print("\n🏆 MADDPG Rendimiento:")
+print(f"   • Costo:    {(1 - MADDPG['cost']) * 100:+.1f}% vs baseline")
+print(f"   • CO₂:      {(1 - MADDPG['co2']) * 100:+.1f}% vs baseline")
+print(f"   • Peak:     {(1 - MADDPG['peak']) * 100:+.1f}% vs baseline")
+print(f"   • vs MARLISA: {(MADDPG['cost'] - MARLISA['cost']) / MARLISA['cost'] * 100:+.1f}% costo, "
+      f"{(MADDPG['episodes'] - MARLISA['episodes']) / MARLISA['episodes'] * 100:.0f}% menos episodios")
 
 print("\n🎉 Gráficas generadas en:")
 print(f"   📁 {OUTPUT_DIR}/")

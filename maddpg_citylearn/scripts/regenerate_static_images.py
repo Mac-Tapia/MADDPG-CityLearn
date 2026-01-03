@@ -1,15 +1,13 @@
 """
 Regenerar todas las imágenes de static/images con el nuevo título del proyecto.
-Título: Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la 
-Optimización de la Flexibilidad Energética en Comunidades Interactivas de 
+Título: Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la
+Optimización de la Flexibilidad Energética en Comunidades Interactivas de
 Redes Eléctricas Inteligentes
 """
 import os
 import json
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
-import matplotlib.patches as mpatches
 
 # Configuración
 OUTPUT_DIR = "static/images"
@@ -60,7 +58,7 @@ print("=" * 70)
 fig, ax = plt.subplots(figsize=(14, 8))
 fig.suptitle(f'{PROJECT_TITLE}\nMapa de Calor de KPIs por Edificio', fontsize=14, fontweight='bold')
 
-kpi_names_heat = ['cost_total', 'carbon_emissions_total', 'daily_peak_average', 
+kpi_names_heat = ['cost_total', 'carbon_emissions_total', 'daily_peak_average',
                   'electricity_consumption_total', 'ramping_average']
 kpi_labels = ['Costo Total', 'Emisiones CO₂', 'Pico Diario', 'Consumo', 'Ramping']
 
@@ -79,7 +77,7 @@ im = ax.imshow(heatmap_array, cmap='RdYlGn_r', aspect='auto', vmin=0.5, vmax=1.5
 ax.set_xticks(range(len(kpi_labels)))
 ax.set_xticklabels(kpi_labels, fontsize=11, rotation=30, ha='right')
 ax.set_yticks(range(n_buildings))
-ax.set_yticklabels([f'Edificio {i+1}' for i in range(n_buildings)], fontsize=10)
+ax.set_yticklabels([f'Edificio {i + 1}' for i in range(n_buildings)], fontsize=10)
 ax.set_xlabel('KPI', fontsize=12)
 ax.set_ylabel('Edificio', fontsize=12)
 
@@ -115,7 +113,7 @@ ax1.set_xlabel('Edificio', fontsize=11)
 ax1.set_ylabel('Costo Total (ratio)', fontsize=11)
 ax1.set_title('Costo Total por Edificio', fontsize=12)
 ax1.set_xticks(range(n_buildings))
-ax1.set_xticklabels([f'B{i+1}' for i in range(n_buildings)], rotation=45)
+ax1.set_xticklabels([f'B{i + 1}' for i in range(n_buildings)], rotation=45)
 ax1.legend()
 ax1.grid(True, alpha=0.3, axis='y')
 
@@ -129,7 +127,7 @@ ax2.set_xlabel('Edificio', fontsize=11)
 ax2.set_ylabel('Emisiones CO₂ (ratio)', fontsize=11)
 ax2.set_title('Emisiones de Carbono por Edificio', fontsize=12)
 ax2.set_xticks(range(n_buildings))
-ax2.set_xticklabels([f'B{i+1}' for i in range(n_buildings)], rotation=45)
+ax2.set_xticklabels([f'B{i + 1}' for i in range(n_buildings)], rotation=45)
 ax2.legend()
 ax2.grid(True, alpha=0.3, axis='y')
 
@@ -143,7 +141,7 @@ ax3.set_xlabel('Edificio', fontsize=11)
 ax3.set_ylabel('Pico Diario (ratio)', fontsize=11)
 ax3.set_title('Peak Shaving por Edificio', fontsize=12)
 ax3.set_xticks(range(n_buildings))
-ax3.set_xticklabels([f'B{i+1}' for i in range(n_buildings)], rotation=45)
+ax3.set_xticklabels([f'B{i + 1}' for i in range(n_buildings)], rotation=45)
 ax3.legend()
 ax3.grid(True, alpha=0.3, axis='y')
 
@@ -162,7 +160,7 @@ ax4.axhline(y=0, color='black', linestyle='-', linewidth=1)
 ax4.set_ylabel('Mejora vs Baseline (%)', fontsize=11)
 ax4.set_title('Resumen de Mejoras (Distrito)', fontsize=12)
 for bar, m in zip(bars4, mejoras):
-    ax4.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.3, f'{m:+.1f}%',
+    ax4.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.3, f'{m:+.1f}%',
              ha='center', va='bottom', fontsize=11, fontweight='bold')
 ax4.grid(True, alpha=0.3, axis='y')
 
@@ -200,7 +198,7 @@ ax.set_xlabel('Ratio vs Baseline', fontsize=11)
 ax.set_title('KPIs Principales', fontsize=12)
 for bar, v in zip(bars, main_values):
     pct = (1 - v) * 100
-    ax.text(v + 0.02, bar.get_y() + bar.get_height()/2, f'{v:.3f} ({pct:+.1f}%)',
+    ax.text(v + 0.02, bar.get_y() + bar.get_height() / 2, f'{v:.3f} ({pct:+.1f}%)',
             va='center', fontsize=10, fontweight='bold')
 ax.set_xlim(0, 1.5)
 ax.legend()
@@ -222,7 +220,8 @@ if baselines:
 # 3.4 Distribución por agente
 ax = axes[1, 0]
 last_rewards = history['agent_rewards'][-1]
-ax.bar(range(1, n_buildings+1), last_rewards, color=plt.cm.viridis(np.linspace(0.2, 0.8, n_buildings)), edgecolor='black')
+ax.bar(range(1, n_buildings + 1), last_rewards,
+       color=plt.cm.viridis(np.linspace(0.2, 0.8, n_buildings)), edgecolor='black')
 ax.axhline(y=np.mean(last_rewards), color='r', linestyle='--', label=f'Media: {np.mean(last_rewards):,.0f}')
 ax.set_xlabel('Edificio', fontsize=11)
 ax.set_ylabel('Reward', fontsize=11)
@@ -258,9 +257,9 @@ RESUMEN DE RESULTADOS
    • Reward Final: {rewards[-1]:,.0f}
 
 🏆 Mejoras vs Baseline:
-   • Costo: {(1-district_dict.get('cost_total',1))*100:+.1f}%
-   • CO₂: {(1-district_dict.get('carbon_emissions_total',1))*100:+.1f}%
-   • Peak: {(1-district_dict.get('daily_peak_average',1))*100:+.1f}%
+   • Costo: {(1 - district_dict.get('cost_total', 1)) * 100:+.1f}%
+   • CO₂: {(1 - district_dict.get('carbon_emissions_total', 1)) * 100:+.1f}%
+   • Peak: {(1 - district_dict.get('daily_peak_average', 1)) * 100:+.1f}%
 
 🏢 Comunidad:
    • Edificios: {n_buildings}
@@ -286,8 +285,8 @@ fig.suptitle(f'{PROJECT_TITLE}\nResultados de Flexibilidad Energética', fontsiz
 ax1 = axes[0, 0]
 agent_rewards = np.array(history['agent_rewards'])
 for ep_idx in range(len(episodes)):
-    ax1.plot(range(1, n_buildings+1), agent_rewards[ep_idx], 'o-', 
-             alpha=0.7, label=f'Ep {ep_idx+1}', linewidth=2)
+    ax1.plot(range(1, n_buildings + 1), agent_rewards[ep_idx], 'o-',
+             alpha=0.7, label=f'Ep {ep_idx + 1}', linewidth=2)
 ax1.set_xlabel('Edificio', fontsize=11)
 ax1.set_ylabel('Reward', fontsize=11)
 ax1.set_title('Evolución de Rewards por Edificio', fontsize=12)
@@ -296,7 +295,7 @@ ax1.grid(True, alpha=0.3)
 
 # Mejora relativa
 ax2 = axes[0, 1]
-mejora_rel = [(r - rewards[0])/rewards[0]*100 for r in rewards]
+mejora_rel = [(r - rewards[0]) / rewards[0] * 100 for r in rewards]
 colors_mej = ['#27ae60' if m >= 0 else '#e74c3c' for m in mejora_rel]
 ax2.bar(episodes, mejora_rel, color=colors_mej, edgecolor='black')
 ax2.axhline(y=0, color='black', linewidth=1)
@@ -325,7 +324,7 @@ ax4.set_title('Mapa de Calor: Rewards', fontsize=12)
 ax4.set_xticks(range(len(episodes)))
 ax4.set_xticklabels(episodes)
 ax4.set_yticks(range(n_buildings))
-ax4.set_yticklabels([f'B{i+1}' for i in range(n_buildings)])
+ax4.set_yticklabels([f'B{i + 1}' for i in range(n_buildings)])
 plt.colorbar(im, ax=ax4, label='Reward')
 
 plt.tight_layout()
@@ -340,16 +339,16 @@ fig, ax = plt.subplots(figsize=(12, 6))
 fig.suptitle(f'{PROJECT_TITLE}\nComparación de KPIs vs Baseline', fontsize=14, fontweight='bold')
 
 kpi_names = ['Costo Total', 'Emisiones CO₂', 'Pico Diario', 'Consumo', 'Ramping', 'Load Factor']
-kpi_keys = ['cost_total', 'carbon_emissions_total', 'daily_peak_average', 
+kpi_keys = ['cost_total', 'carbon_emissions_total', 'daily_peak_average',
             'electricity_consumption_total', 'ramping_average', 'daily_one_minus_load_factor_average']
 kpi_values = [district_dict.get(k, 1.0) for k in kpi_keys]
 
 x = np.arange(len(kpi_names))
 width = 0.35
 
-bars_base = ax.bar(x - width/2, [1.0]*len(kpi_names), width, label='Baseline', color='#95a5a6', edgecolor='black')
+bars_base = ax.bar(x - width / 2, [1.0] * len(kpi_names), width, label='Baseline', color='#95a5a6', edgecolor='black')
 colors_maddpg = ['#27ae60' if v < 1.0 else '#e74c3c' for v in kpi_values]
-bars_maddpg = ax.bar(x + width/2, kpi_values, width, label='MADDPG', color=colors_maddpg, edgecolor='black')
+bars_maddpg = ax.bar(x + width / 2, kpi_values, width, label='MADDPG', color=colors_maddpg, edgecolor='black')
 
 ax.set_ylabel('Valor (1.0 = Baseline)', fontsize=12)
 ax.set_xticks(x)
@@ -361,7 +360,7 @@ ax.grid(True, alpha=0.3, axis='y')
 # Añadir mejoras
 for i, (bar, val) in enumerate(zip(bars_maddpg, kpi_values)):
     pct = (1 - val) * 100
-    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.02, 
+    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02,
             f'{pct:+.1f}%', ha='center', va='bottom', fontsize=9, fontweight='bold')
 
 plt.tight_layout()
@@ -431,7 +430,7 @@ ax.set_ylabel('Mejora vs Baseline (%)', fontsize=12)
 
 for bar, imp in zip(bars, improvements):
     height = bar.get_height()
-    ax.text(bar.get_x() + bar.get_width()/2, height + 0.5, f'{imp:+.1f}%',
+    ax.text(bar.get_x() + bar.get_width() / 2, height + 0.5, f'{imp:+.1f}%',
             ha='center', va='bottom', fontsize=14, fontweight='bold')
 
 ax.set_ylim(min(improvements) - 5, max(improvements) + 8)
@@ -459,7 +458,7 @@ values_maddpg = [
 values_baseline = [1.0] * len(categories)
 
 # Cerrar el polígono
-angles = np.linspace(0, 2*np.pi, len(categories), endpoint=False).tolist()
+angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
 values_maddpg = values_maddpg + [values_maddpg[0]]
 values_baseline = values_baseline + [values_baseline[0]]
 angles = angles + [angles[0]]
@@ -491,17 +490,17 @@ if baselines:
     all_methods = list(baselines.keys()) + ['MADDPG']
     all_rewards = [baselines[m].get('mean_reward', 0) for m in baselines.keys()] + [maddpg_reward]
     colors_comp = ['#e74c3c' if r < 0 else '#f39c12' if r < 2000 else '#95a5a6' for r in all_rewards[:-1]] + ['#27ae60']
-    
+
     bars = ax1.bar(all_methods, all_rewards, color=colors_comp, edgecolor='black')
     ax1.axhline(y=0, color='black', linewidth=1)
     ax1.set_ylabel('Reward Medio', fontsize=12)
     ax1.set_title('Comparación de Rewards', fontsize=12)
     ax1.tick_params(axis='x', rotation=20)
     ax1.grid(True, alpha=0.3, axis='y')
-    
+
     for bar, val in zip(bars, all_rewards):
         y_pos = val + 200 if val >= 0 else val - 400
-        ax1.text(bar.get_x() + bar.get_width()/2, y_pos, f'{val:,.0f}',
+        ax1.text(bar.get_x() + bar.get_width() / 2, y_pos, f'{val:,.0f}',
                  ha='center', va='bottom' if val >= 0 else 'top', fontsize=10, fontweight='bold')
 
 # Mejora porcentual vs No Control
@@ -516,7 +515,7 @@ if baselines and 'No Control' in baselines:
             val = baselines[m].get('mean_reward', 0)
         mejora = (val - no_control) / abs(no_control) * 100
         mejoras_vs_nc.append(mejora)
-    
+
     colors_pct = ['#27ae60' if m > 0 else '#e74c3c' for m in mejoras_vs_nc]
     bars2 = ax2.bar(all_methods, mejoras_vs_nc, color=colors_pct, edgecolor='black')
     ax2.axhline(y=0, color='black', linewidth=1)
@@ -550,7 +549,7 @@ values_maddpg_norm = [
 values_baseline_norm = [0.1, 0.5, 0.5, 0.5, 0.5]
 
 # Cerrar polígono
-angles = np.linspace(0, 2*np.pi, len(categories), endpoint=False).tolist()
+angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
 values_maddpg_norm = values_maddpg_norm + [values_maddpg_norm[0]]
 values_baseline_norm = values_baseline_norm + [values_baseline_norm[0]]
 angles = angles + [angles[0]]
@@ -579,19 +578,19 @@ fig.suptitle(f'{PROJECT_TITLE}\nComparación de Rewards', fontsize=14, fontweigh
 if baselines:
     methods = list(baselines.keys()) + ['MADDPG']
     rewards_all = [baselines[m].get('mean_reward', 0) for m in baselines.keys()] + [maddpg_reward]
-    
+
     colors = ['#e74c3c' if r < 0 else '#f39c12' if r < 2000 else '#27ae60' for r in rewards_all]
     colors[-1] = '#27ae60'  # MADDPG siempre verde
-    
+
     bars = ax.barh(methods, rewards_all, color=colors, edgecolor='black', height=0.6)
     ax.axvline(x=0, color='black', linewidth=1)
     ax.set_xlabel('Reward Medio', fontsize=12)
-    
+
     for bar, val in zip(bars, rewards_all):
         x_pos = val + 100 if val >= 0 else val - 100
-        ax.text(x_pos, bar.get_y() + bar.get_height()/2, f'{val:,.0f}',
+        ax.text(x_pos, bar.get_y() + bar.get_height() / 2, f'{val:,.0f}',
                 va='center', ha='left' if val >= 0 else 'right', fontsize=11, fontweight='bold')
-    
+
     ax.grid(True, alpha=0.3, axis='x')
 
 plt.tight_layout()
@@ -608,7 +607,7 @@ fig.suptitle(f'{PROJECT_TITLE}\nAnálisis de Trade-offs', fontsize=14, fontweigh
 # Trade-off Costo vs CO2
 ax1 = axes[0]
 ax1.scatter([1.0], [1.0], s=200, c='#95a5a6', marker='s', label='Baseline', edgecolors='black', zorder=5)
-ax1.scatter([district_dict.get('cost_total', 1)], [district_dict.get('carbon_emissions_total', 1)], 
+ax1.scatter([district_dict.get('cost_total', 1)], [district_dict.get('carbon_emissions_total', 1)],
             s=300, c='#27ae60', marker='*', label='MADDPG', edgecolors='black', zorder=5)
 ax1.axhline(y=1.0, color='gray', linestyle='--', alpha=0.5)
 ax1.axvline(x=1.0, color='gray', linestyle='--', alpha=0.5)

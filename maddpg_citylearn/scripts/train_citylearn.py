@@ -90,7 +90,7 @@ def main():
             break
         except KeyboardInterrupt:
             if attempt < max_retries - 1:
-                logger.warning(f"Intento {attempt+1} falló, reintentando...")
+                logger.warning(f"Intento {attempt + 1} falló, reintentando...")
                 continue
             else:
                 raise

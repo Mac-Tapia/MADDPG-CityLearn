@@ -119,7 +119,7 @@ if total_with_ev_data > 0:
     print("\nEdificios con datos EV:")
     for i, has_data in ev_data_detected.items():
         if has_data:
-            print(f"  - Building_{i+1} (ID {i})")
+            print(f"  - Building_{i + 1} (ID {i})")
             if non_zero_values[i]:
                 print("    Ejemplos de valores no-cero:")
                 for val in non_zero_values[i][:3]:

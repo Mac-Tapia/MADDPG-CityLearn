@@ -25,7 +25,7 @@ for i, building in enumerate(env.buildings):
 
     if ev_actions:
         buildings_with_ev_chargers.append(i)
-        print(f"\n🏢 Building_{i+1} (ID {i})")
+        print(f"\n🏢 Building_{i + 1} (ID {i})")
         print(f"  ├─ Dimensión action space: {action_space_dim}")
         print(f"  ├─ Total acciones disponibles: {len(action_metadata)}")
         print(f"  ├─ Acciones EV charger: {ev_actions}")
@@ -84,7 +84,7 @@ for i, building in enumerate(env.buildings):
 
     print(
         (
-            f"Building_{i+1:2d}: obs={obs_dim:2d}, "
+            f"Building_{i + 1:2d}: obs={obs_dim:2d}, "
             f"actions={action_dim}, recursos={active_actions}"
         )
     )
