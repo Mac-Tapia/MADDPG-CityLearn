@@ -1,9 +1,0 @@
-{
-  "method": "MADDPG",
-  "checkpoint": "models/citylearn_maddpg\\maddpg.pt",
-  "episodes": 1,
-  "total_steps": 8760,
-  "mean_reward": 8140.919921875,
-  "std_reward": 0.0,
-  "kpis": "                                     cost_function     value         name     level\n0                            all_time_peak_average  0.969562     District  district\n1          annual_normalized_unserved_energy_total  0.000000     District  district\n2                           carbon_emissions_total  0.977386     District  district\n3                                       cost_total  0.990060     District  district\n4              daily_one_minus_load_factor_average  1.424624     District  district\n..                                             ...       ...          ...       ...\n288                   discomfort_hot_delta_maximum  0.000000  Building_17  building\n289                   discomfort_hot_delta_average  0.000000  Building_17  building\n290        one_minus_thermal_resilience_proportion       NaN  Building_17  building\n291  power_outage_normalized_unserved_energy_total       NaN  Building_17  building\n292        annual_normalized_unserved_energy_total  0.000000  Building_17  building\n\n[293 rows x 4 columns]"
-}

@@ -361,10 +361,10 @@ def main():
                 logger.info("KPIs CityLearn: %s", kpis)
                 try:
                     kpi_path = os.path.join(cfg.training.save_dir, "kpis.json")
-                    if hasattr(kpis, "to_dict"):
+                    if kpis is not None and hasattr(kpis, "to_dict"):
                         kpis_serializable = kpis.to_dict(orient="records")
                     else:
-                        kpis_serializable = kpis
+                        kpis_serializable = kpis if kpis is not None else {}
                     with open(kpi_path, "w", encoding="utf-8") as f:
                         json.dump(kpis_serializable, f, indent=2)
                     logger.info("KPIs guardados en %s", kpi_path)
