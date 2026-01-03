@@ -36,9 +36,9 @@ for i, building in enumerate(env.buildings):
     # Vehículo eléctrico
     if (
         hasattr(building, "electric_vehicle")
-        and building.electric_vehicle is not None
+        and building.electric_vehicle is not None  # type: ignore[attr-defined]
     ):
-        ev = building.electric_vehicle
+        ev = building.electric_vehicle  # type: ignore[attr-defined]
         ev_capacity = ev.capacity if hasattr(ev, "capacity") else "N/A"
         ev_charger = (
             ev.charger_power if hasattr(ev, "charger_power") else "N/A"

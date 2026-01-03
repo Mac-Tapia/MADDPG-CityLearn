@@ -28,8 +28,8 @@ for i, building in enumerate(env.buildings):
     has_ev_attr = hasattr(building, "electric_vehicle")
     print(f"  ├─ Atributo 'electric_vehicle': {has_ev_attr}")
 
-    if has_ev_attr and building.electric_vehicle is not None:
-        ev = building.electric_vehicle
+    if has_ev_attr and building.electric_vehicle is not None:  # type: ignore[attr-defined]
+        ev = building.electric_vehicle  # type: ignore[attr-defined]
         print(f"  ├─ EV object: {type(ev).__name__}")
 
         # Inspeccionar atributos del EV
@@ -79,12 +79,12 @@ non_zero_values = {i: [] for i in range(len(env.buildings))}
 for step in range(100):
     # Acciones aleatorias
     actions = [
-        np.random.uniform(-1, 1, size=space.shape)
+        np.random.uniform(-1, 1, size=space.shape).tolist()
         for space in env.action_space
     ]
 
     try:
-        observations, rewards, info, terminated, truncated = env.step(actions)
+        observations, rewards, info, terminated, truncated = env.step(actions)  # type: ignore[arg-type]
 
         for i, obs in enumerate(observations):
             building = env.buildings[i]
