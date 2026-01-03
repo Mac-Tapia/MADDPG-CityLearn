@@ -1,0 +1,48 @@
+# TODO: pegar aquí la config YAML.
+env:
+  # Dataset con vehículos eléctricos para control de flexibilidad energética
+  schema: "citylearn_challenge_2022_phase_all_plus_evs"
+  simulation_start_time_step: null
+  simulation_end_time_step: null
+  reward_function: null
+  # Pesos para recompensa personalizada orientada a FLEXIBILIDAD ENERGÉTICA
+  # Ajustar según prioridad del objetivo de tesis
+  reward_weights:
+    cost: 1.0         # penaliza costo energético (respuesta a precio dinámico)
+    peak: 0.5         # penaliza picos de demanda (peak shaving)
+    co2: 0.3          # penaliza emisiones de carbono
+    discomfort: 0.2   # penaliza disconfort térmico (restricción de confort)
+
+maddpg:
+  gamma: 0.95               # Reducido: horizonte más corto para señales más claras
+  tau: 0.005                # Estándar para DDPG/MADDPG
+  actor_lr: 0.0003          # Learning rate estándar para Adam
+  critic_lr: 0.001          # Crítico aprende más rápido que actor
+  hidden_dim: 256
+  buffer_size: 100000       # Suficiente para ~11 episodios completos
+  batch_size: 256           # Estándar
+  device: "cuda"
+  exploration_initial_std: 0.3    # Buena exploración inicial
+  exploration_final_std: 0.05     # Exploración mínima al final
+  exploration_decay_steps: 150000 # Decae en ~17 episodios (~85% del training)
+  update_after: 8760        # Esperar 1 episodio completo antes de entrenar
+  update_every: 50          # Actualizar cada 50 steps
+  updates_per_step: 1       # 1 update por ciclo
+
+training:
+  episodes: 10              # 10 episodios
+  log_every: 1
+  max_steps_per_episode: null
+  seed: 42
+  save_dir: "models/citylearn_maddpg"  # Carpeta limpia
+  # Validación offline y early stopping
+  val_every: 5
+  val_episodes: 1           # 1 episodio de validación (rápido)
+  early_stopping_patience: 6     # Más paciencia
+  early_stopping_min_delta: 100.0  # Mejora significativa requerida
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false
+  checkpoint_path: "models/citylearn_maddpg/maddpg.pt"

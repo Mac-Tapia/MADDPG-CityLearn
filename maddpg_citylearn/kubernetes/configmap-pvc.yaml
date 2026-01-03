@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: maddpg-models-pvc
+  namespace: default
+spec:
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: 5Gi
+  # Uncomment and modify based on your storage class
+  # storageClassName: standard
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maddpg-config
+  namespace: default
+data:
+  citylearn_maddpg.yaml: |
+    env:
+      # Dataset con vehículos eléctricos para control de flexibilidad energética
+      schema: "citylearn_challenge_2022_phase_all_plus_evs"
+      simulation_start_time_step: null
+      simulation_end_time_step: null
+      reward_function: null
+
+    maddpg:
+      gamma: 0.99
+      tau: 0.005
+      actor_lr: 0.0005
+      critic_lr: 0.001
+      hidden_dim: 256
+      buffer_size: 200000
+      batch_size: 256
+      device: "cpu"
+      exploration_initial_std: 0.2
+      exploration_final_std: 0.05
+      exploration_decay_steps: 500000
+      update_after: 1000
+      update_every: 50
+      updates_per_step: 1
+
+    training:
+      episodes: 50
+      log_every: 1
+      max_steps_per_episode: null
+      seed: 0
+      save_dir: "models/citylearn_maddpg"
+
+    api:
+      host: "0.0.0.0"
+      port: 8000
+      reload: false
+      checkpoint_path: "models/citylearn_maddpg/maddpg.pt"

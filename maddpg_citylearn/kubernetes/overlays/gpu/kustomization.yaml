@@ -1,0 +1,52 @@
+# Kustomization overlay para GPU
+# Uso: kubectl apply -k kubernetes/overlays/gpu/
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Referencia a la base
+resources:
+  - ../../
+
+# Parches para habilitar GPU
+patches:
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: maddpg-citylearn
+      spec:
+        template:
+          spec:
+            containers:
+            - name: maddpg-api
+              resources:
+                requests:
+                  memory: "4Gi"
+                  cpu: "2000m"
+                  nvidia.com/gpu: "1"
+                limits:
+                  memory: "8Gi"
+                  cpu: "4000m"
+                  nvidia.com/gpu: "1"
+              env:
+              - name: CUDA_VISIBLE_DEVICES
+                value: "0"
+              - name: NVIDIA_VISIBLE_DEVICES
+                value: "all"
+              - name: NVIDIA_DRIVER_CAPABILITIES
+                value: "compute,utility"
+            tolerations:
+            - key: "nvidia.com/gpu"
+              operator: "Exists"
+              effect: "NoSchedule"
+            nodeSelector:
+              accelerator: nvidia-gpu
+
+# Etiquetas adicionales para GPU
+commonLabels:
+  gpu-enabled: "true"
+
+# Anotaciones para monitoreo GPU
+commonAnnotations:
+  gpu.nvidia.com/enabled: "true"

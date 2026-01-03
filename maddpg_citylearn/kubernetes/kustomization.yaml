@@ -1,0 +1,55 @@
+# Kustomization para MADDPG CityLearn
+# Permite desplegar todos los recursos de Kubernetes de forma organizada
+# Uso: kubectl apply -k kubernetes/
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: maddpg-citylearn
+
+# Namespace donde se despliegan los recursos
+namespace: default
+
+# Recursos a desplegar (en orden de dependencias)
+resources:
+  # Seguridad
+  - rbac.yaml
+  - secrets.yaml
+  # Configuración
+  - configmap-pvc.yaml
+  # Despliegue
+  - deployment.yaml
+  - deployment-secure.yaml
+  - service.yaml
+  # Escalado
+  - hpa.yaml
+  # Red
+  - networkpolicy.yaml
+  - ingress.yaml
+  # Monitoreo (requiere Prometheus Operator)
+  - monitoring.yaml
+
+# Etiquetas comunes para todos los recursos
+commonLabels:
+  app.kubernetes.io/name: maddpg-citylearn
+  app.kubernetes.io/component: api
+  app.kubernetes.io/part-of: citylearn-energy
+  app.kubernetes.io/managed-by: kustomize
+
+# Anotaciones comunes
+commonAnnotations:
+  project: "maddpg-citylearn-tesis"
+  environment: "production"
+
+# Imágenes - permite sobrescribir la imagen fácilmente
+images:
+  - name: maddpg-citylearn
+    newTag: latest
+
+# ConfigMap generator (alternativa al configmap estático)
+# configMapGenerator:
+# - name: maddpg-runtime-config
+#   literals:
+#     - LOG_LEVEL=INFO
+#     - API_HOST=0.0.0.0

@@ -1,0 +1,88 @@
+# NetworkPolicy para MADDPG CityLearn
+# Basado en Guía de Despliegue 2025 - Sección 7.2 Seguridad en Infraestructura
+# Restringe el tráfico de red para mejorar la seguridad del clúster
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: maddpg-citylearn-network-policy
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+spec:
+  # Aplica a pods con label app=maddpg-citylearn
+  podSelector:
+    matchLabels:
+      app: maddpg-citylearn
+  
+  # Tipos de tráfico a controlar
+  policyTypes:
+  - Ingress
+  - Egress
+
+  # Reglas de entrada (Ingress)
+  ingress:
+  # Permitir tráfico desde el Ingress Controller
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8000
+
+  # Permitir tráfico interno entre pods de la misma aplicación
+  - from:
+    - podSelector:
+        matchLabels:
+          app: maddpg-citylearn
+    ports:
+    - protocol: TCP
+      port: 8000
+
+  # Permitir health checks desde el kubelet
+  - from:
+    - ipBlock:
+        cidr: 10.0.0.0/8  # Rango típico de nodos K8s
+    ports:
+    - protocol: TCP
+      port: 8000
+
+  # Reglas de salida (Egress)
+  egress:
+  # Permitir DNS (necesario para resolución de nombres)
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+
+  # Permitir tráfico interno entre pods de la aplicación
+  - to:
+    - podSelector:
+        matchLabels:
+          app: maddpg-citylearn
+    ports:
+    - protocol: TCP
+      port: 8000
+
+  # Bloquear todo el tráfico externo no especificado (por defecto)
+  # Para permitir acceso a servicios externos (ej. APIs), agregar reglas adicionales
+
+---
+# NetworkPolicy adicional: Denegar todo por defecto (Zero Trust)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: default
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress

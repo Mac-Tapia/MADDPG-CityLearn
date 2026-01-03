@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maddpg-citylearn-gpu
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+    version: v1
+    gpu: "enabled"
+spec:
+  replicas: 1  # GPU: solo 1 réplica por limitación de GPU local
+  selector:
+    matchLabels:
+      app: maddpg-citylearn
+      gpu: "enabled"
+  template:
+    metadata:
+      labels:
+        app: maddpg-citylearn
+        version: v1
+        gpu: "enabled"
+    spec:
+      # Toleration para nodos con GPU
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      
+      containers:
+      - name: maddpg-api
+        image: maddpg-citylearn:latest
+        imagePullPolicy: Never  # Usar imagen local
+        
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        
+        # Environment variables
+        env:
+        - name: PYTHONPATH
+          value: "/app/src"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: API_HOST
+          value: "0.0.0.0"
+        - name: API_PORT
+          value: "8000"
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: "all"
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: "compute,utility"
+        
+        # Resource requests and limits CON GPU
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+            nvidia.com/gpu: "1"  # Solicitar 1 GPU
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+            nvidia.com/gpu: "1"  # Limitar a 1 GPU
+        
+        # Liveness probe
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        
+        # Readiness probe
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maddpg-citylearn-gpu-svc
+  namespace: default
+  labels:
+    gpu: "enabled"
+spec:
+  type: NodePort
+  selector:
+    app: maddpg-citylearn
+    gpu: "enabled"
+  ports:
+  - port: 8000
+    targetPort: 8000
+    nodePort: 30081  # Accesible en localhost:30081
+    name: http

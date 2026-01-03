@@ -1,0 +1,284 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # ========================================
+  # Job 1: Linting and Code Quality
+  # ========================================
+  lint:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install black flake8 mypy
+    
+    - name: Run Black (code formatter check)
+      run: |
+        black --check maddpg_citylearn/src maddpg_citylearn/tests || echo "Code formatting issues found"
+    
+    - name: Run Flake8 (linter)
+      run: |
+        flake8 maddpg_citylearn/src maddpg_citylearn/tests --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 maddpg_citylearn/src maddpg_citylearn/tests --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Run MyPy (type checker)
+      run: |
+        mypy maddpg_citylearn/src --ignore-missing-imports || echo "Type checking issues found"
+
+  # ========================================
+  # Job 2: Unit and Integration Tests
+  # ========================================
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      working-directory: maddpg_citylearn
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov httpx
+    
+    - name: Run pytest
+      working-directory: maddpg_citylearn
+      run: |
+        pytest tests/ -v --cov=src/maddpg_tesis --cov-report=xml --cov-report=term
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./maddpg_citylearn/coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  # ========================================
+  # Job 3: Security Scanning
+  # ========================================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner (filesystem)
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: 'maddpg_citylearn'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH'
+    
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+    
+    - name: Set up Python for Safety check
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install Safety
+      run: pip install safety
+    
+    - name: Run Safety check
+      working-directory: maddpg_citylearn
+      run: |
+        safety check --file requirements.txt --output json || echo "Vulnerabilities found"
+
+  # ========================================
+  # Job 4: Build Docker Image
+  # ========================================
+  docker-build:
+    name: Build and Scan Docker Image
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      working-directory: maddpg_citylearn
+      run: |
+        docker build -t maddpg-citylearn:${{ github.sha }} .
+    
+    - name: Run Trivy vulnerability scanner (image)
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'maddpg-citylearn:${{ github.sha }}'
+        format: 'sarif'
+        output: 'trivy-image-results.sarif'
+        severity: 'CRITICAL,HIGH'
+    
+    - name: Upload Trivy image scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-image-results.sarif'
+
+  # ========================================
+  # Job 5: Sign and Push Docker Image
+  # Cumple con Guía 2025 - Sección 7.1 Firmado de Imágenes
+  # ========================================
+  sign-and-push:
+    name: Sign and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: docker-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      packages: write
+      id-token: write  # Necesario para keyless signing con Fulcio
+    
+    outputs:
+      image-digest: ${{ steps.build-push.outputs.digest }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@v3.7.0
+      with:
+        cosign-release: 'v2.4.1'
+    
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Extract metadata for Docker
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/${{ github.repository }}/maddpg-citylearn
+        tags: |
+          type=sha,prefix=
+          type=ref,event=branch
+          type=semver,pattern={{version}}
+          type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+    
+    - name: Build and Push Docker image
+      id: build-push
+      uses: docker/build-push-action@v6
+      with:
+        context: maddpg_citylearn
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        provenance: true
+        sbom: true
+    
+    # ========================================
+    # Firmado de imagen con Cosign (Keyless - Sigstore)
+    # ========================================
+    - name: Sign container image with Cosign (Keyless)
+      env:
+        COSIGN_EXPERIMENTAL: "true"
+        DIGEST: ${{ steps.build-push.outputs.digest }}
+      run: |
+        echo "Signing image: ghcr.io/${{ github.repository }}/maddpg-citylearn@${DIGEST}"
+        cosign sign --yes ghcr.io/${{ github.repository }}/maddpg-citylearn@${DIGEST}
+    
+    - name: Verify signature
+      env:
+        DIGEST: ${{ steps.build-push.outputs.digest }}
+      run: |
+        echo "Verifying signature for: ghcr.io/${{ github.repository }}/maddpg-citylearn@${DIGEST}"
+        cosign verify \
+          --certificate-identity-regexp="https://github.com/${{ github.repository }}/*" \
+          --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+          ghcr.io/${{ github.repository }}/maddpg-citylearn@${DIGEST}
+    
+    # ========================================
+    # Generar y firmar SBOM (Software Bill of Materials)
+    # ========================================
+    - name: Generate SBOM with Syft
+      uses: anchore/sbom-action@v0
+      with:
+        image: ghcr.io/${{ github.repository }}/maddpg-citylearn@${{ steps.build-push.outputs.digest }}
+        format: spdx-json
+        output-file: sbom.spdx.json
+    
+    - name: Attach SBOM to image
+      env:
+        DIGEST: ${{ steps.build-push.outputs.digest }}
+      run: |
+        cosign attach sbom --sbom sbom.spdx.json ghcr.io/${{ github.repository }}/maddpg-citylearn@${DIGEST}
+    
+    - name: Sign SBOM
+      env:
+        DIGEST: ${{ steps.build-push.outputs.digest }}
+      run: |
+        cosign sign --yes --attachment sbom ghcr.io/${{ github.repository }}/maddpg-citylearn@${DIGEST}
+
+    - name: Output signed image reference
+      run: |
+        echo "✅ Imagen firmada exitosamente!"
+        echo "📦 Image: ghcr.io/${{ github.repository }}/maddpg-citylearn"
+        echo "🔏 Digest: ${{ steps.build-push.outputs.digest }}"
+        echo ""
+        echo "Para verificar la firma:"
+        echo "cosign verify --certificate-identity-regexp='https://github.com/${{ github.repository }}/*' \\"
+        echo "  --certificate-oidc-issuer='https://token.actions.githubusercontent.com' \\"
+        echo "  ghcr.io/${{ github.repository }}/maddpg-citylearn@${{ steps.build-push.outputs.digest }}"

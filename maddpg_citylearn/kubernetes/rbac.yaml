@@ -1,0 +1,94 @@
+# RBAC - Role-Based Access Control para MADDPG CityLearn
+# Cumple con Guía 2025 - Sección 7.2 Seguridad en Infraestructura
+# Principio de mínimo privilegio
+
+---
+# ServiceAccount específico para la aplicación
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: maddpg-citylearn-sa
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+    component: security
+automountServiceAccountToken: false  # No montar token automáticamente
+
+---
+# Role con permisos mínimos necesarios
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: maddpg-citylearn-role
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+    component: security
+rules:
+  # Solo permisos de lectura en ConfigMaps propios
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["maddpg-citylearn-config"]
+    verbs: ["get", "watch"]
+  
+  # Solo lectura de secrets específicos
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["maddpg-citylearn-secrets"]
+    verbs: ["get"]
+  
+  # Permitir ver eventos para debugging
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list"]
+
+---
+# RoleBinding - vincula ServiceAccount con Role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: maddpg-citylearn-rolebinding
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+    component: security
+subjects:
+  - kind: ServiceAccount
+    name: maddpg-citylearn-sa
+    namespace: default
+roleRef:
+  kind: Role
+  name: maddpg-citylearn-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# ClusterRole para métricas (necesario para Prometheus)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: maddpg-citylearn-metrics-reader
+  labels:
+    app: maddpg-citylearn
+    component: monitoring
+rules:
+  # Prometheus necesita scrape de métricas
+  - nonResourceURLs: ["/metrics"]
+    verbs: ["get"]
+
+---
+# ClusterRoleBinding para Prometheus scraping
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: maddpg-citylearn-metrics-binding
+  labels:
+    app: maddpg-citylearn
+    component: monitoring
+subjects:
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: monitoring
+roleRef:
+  kind: ClusterRole
+  name: maddpg-citylearn-metrics-reader
+  apiGroup: rbac.authorization.k8s.io

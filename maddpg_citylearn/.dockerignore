@@ -1,0 +1,79 @@
+# .dockerignore - Archivos a ignorar en el build de Docker
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.cover
+
+# Logs
+*.log
+logs/
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# CI/CD
+.github/
+
+# Development files
+docker-compose.yml
+.dockerignore
+Dockerfile
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kubernetes manifests
+kubernetes/
+
+# Tests
+tests/
+
+# Scripts
+scripts/
+*.sh
+*.ps1
+
+# Reference materials
+referencia/

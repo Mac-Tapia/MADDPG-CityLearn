@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: maddpg-citylearn-service
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+spec:
+  type: ClusterIP
+  selector:
+    app: maddpg-citylearn
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 8000
+  sessionAffinity: None
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maddpg-citylearn-lb
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+spec:
+  type: LoadBalancer
+  selector:
+    app: maddpg-citylearn
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8000
+    targetPort: 8000
+  sessionAffinity: None

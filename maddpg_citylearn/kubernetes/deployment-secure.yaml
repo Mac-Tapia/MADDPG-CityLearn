@@ -1,0 +1,216 @@
+# Pod Security Standards - Hardened Deployment
+# Cumple con Guía 2025 - Sección 7.2 Pod Security
+# Aplica PSS nivel "restricted" (máxima seguridad)
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maddpg-citylearn-secure
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+    version: v1.0.0
+    component: inference
+    # Pod Security Standards Labels (PSS)
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    # Seguridad - metadata
+    seccomp.security.kubernetes.io/pod: runtime/default
+    container.apparmor.security.beta.kubernetes.io/maddpg-api: runtime/default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: maddpg-citylearn
+  
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  
+  template:
+    metadata:
+      labels:
+        app: maddpg-citylearn
+        version: v1.0.0
+      annotations:
+        # Prometheus scraping
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+        # Seguridad
+        seccomp.security.kubernetes.io/pod: runtime/default
+    spec:
+      # ServiceAccount con RBAC
+      serviceAccountName: maddpg-citylearn-sa
+      automountServiceAccountToken: false
+      
+      # Pod Security Context (nivel pod)
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        # Seccomp profile
+        seccompProfile:
+          type: RuntimeDefault
+      
+      # DNS Policy
+      dnsPolicy: ClusterFirst
+      
+      # Anti-affinity para HA
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - maddpg-citylearn
+                topologyKey: kubernetes.io/hostname
+      
+      # Image Pull Secrets (registry privado)
+      # imagePullSecrets:
+      #   - name: maddpg-citylearn-registry
+      
+      containers:
+        - name: maddpg-api
+          image: maddpg-citylearn:latest
+          imagePullPolicy: IfNotPresent
+          
+          # Container Security Context (nivel container)
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            capabilities:
+              drop:
+                - ALL
+            # Seccomp a nivel container
+            seccompProfile:
+              type: RuntimeDefault
+          
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          
+          # Variables de entorno desde Secrets
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: LOG_LEVEL
+              value: "INFO"
+            - name: LOG_FORMAT
+              value: "json"  # Logging estructurado
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: maddpg-citylearn-secrets
+                  key: api-key
+                  optional: true
+          
+          # ConfigMap como volumen
+          envFrom:
+            - configMapRef:
+                name: maddpg-citylearn-config
+                optional: true
+          
+          # Recursos con límites estrictos
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2000m"
+              memory: "4Gi"
+          
+          # Probes
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+          
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 30  # 30 * 5s = 150s máximo para startup
+          
+          # Volúmenes montados
+          volumeMounts:
+            # Directorio temporal writable
+            - name: tmp
+              mountPath: /tmp
+            # Cache writable
+            - name: cache
+              mountPath: /home/appuser/.cache
+            # Modelos (read-only)
+            - name: models
+              mountPath: /app/models
+              readOnly: true
+      
+      # Volúmenes
+      volumes:
+        # emptyDir para /tmp (readOnlyRootFilesystem compatible)
+        - name: tmp
+          emptyDir:
+            sizeLimit: 100Mi
+        # Cache temporal
+        - name: cache
+          emptyDir:
+            sizeLimit: 500Mi
+        # Modelos desde PVC o emptyDir
+        - name: models
+          emptyDir: {}
+      
+      # Tolerations (sin GPU por defecto)
+      tolerations: []
+      
+      # Node selector (opcional)
+      # nodeSelector:
+      #   kubernetes.io/os: linux
+
+---
+# PodDisruptionBudget para alta disponibilidad
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: maddpg-citylearn-pdb
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: maddpg-citylearn

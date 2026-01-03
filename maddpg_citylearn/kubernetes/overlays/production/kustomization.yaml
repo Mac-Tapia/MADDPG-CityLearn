@@ -1,0 +1,88 @@
+# Kustomization overlay para producción
+# Uso: kubectl apply -k kubernetes/overlays/production/
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Referencia a la base
+resources:
+  - ../../
+
+# Namespace de producción
+namespace: maddpg-production
+
+# Parches para producción
+patches:
+  # Aumentar réplicas y recursos
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: maddpg-citylearn
+      spec:
+        replicas: 3
+        template:
+          spec:
+            containers:
+            - name: maddpg-api
+              resources:
+                requests:
+                  memory: "4Gi"
+                  cpu: "2000m"
+                limits:
+                  memory: "8Gi"
+                  cpu: "4000m"
+              env:
+              - name: LOG_LEVEL
+                value: "WARNING"
+              - name: ENVIRONMENT
+                value: "production"
+            affinity:
+              podAntiAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                      - maddpg-citylearn
+                  topologyKey: kubernetes.io/hostname
+
+  # Ajustar HPA para producción
+  - patch: |-
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      metadata:
+        name: maddpg-citylearn-hpa
+      spec:
+        minReplicas: 3
+        maxReplicas: 20
+        metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 60
+
+  # Habilitar TLS en Ingress
+  - patch: |-
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: maddpg-citylearn-ingress
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+          nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      spec:
+        tls:
+        - hosts:
+          - maddpg-citylearn.example.com
+          secretName: maddpg-citylearn-tls
+
+# Etiquetas de producción
+commonLabels:
+  environment: production
+
+commonAnnotations:
+  deployment.kubernetes.io/revision: "1"

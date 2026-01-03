@@ -1,0 +1,434 @@
+# ServiceMonitor para Prometheus Operator
+# Cumple con Guía 2025 - Sección 8.2 Métricas y Observabilidad
+# Permite que Prometheus descubra y scrape automáticamente los pods
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: maddpg-citylearn-monitor
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+    component: monitoring
+    release: prometheus  # Label para que Prometheus Operator lo descubra
+spec:
+  # Selector del Service a monitorear
+  selector:
+    matchLabels:
+      app: maddpg-citylearn
+  
+  # Namespaces donde buscar el Service
+  namespaceSelector:
+    matchNames:
+      - default
+  
+  # Configuración de endpoints
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      scheme: http
+      
+      # Relabeling para agregar metadata
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
+        - sourceLabels: [__meta_kubernetes_pod_label_version]
+          targetLabel: version
+      
+      # Metric relabeling
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          regex: 'maddpg_.*'
+          action: keep
+
+---
+# PodMonitor para casos donde no hay Service
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: maddpg-citylearn-pod-monitor
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+    component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: maddpg-citylearn
+  
+  namespaceSelector:
+    matchNames:
+      - default
+  
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+
+---
+# PrometheusRule - Reglas de alerta
+# Cumple con Guía 2025 - Sección 8.4 Alertas
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: maddpg-citylearn-alerts
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+    component: monitoring
+    role: alert-rules
+    release: prometheus
+spec:
+  groups:
+    # ========================================
+    # Alertas de Disponibilidad
+    # ========================================
+    - name: maddpg-availability
+      interval: 30s
+      rules:
+        # Alerta: Servicio caído
+        - alert: MADDPGServiceDown
+          expr: up{job="maddpg-citylearn"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG CityLearn service is down"
+            description: "The MADDPG inference service has been down for more than 1 minute."
+            runbook_url: "https://docs.example.com/runbooks/maddpg-service-down"
+        
+        # Alerta: Menos réplicas de las esperadas
+        - alert: MADDPGInsufficientReplicas
+          expr: |
+            kube_deployment_status_replicas_available{deployment="maddpg-citylearn"}
+            < kube_deployment_spec_replicas{deployment="maddpg-citylearn"}
+          for: 5m
+          labels:
+            severity: warning
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG has insufficient replicas"
+            description: "MADDPG has {{ $value }} available replicas, expected {{ $labels.replicas }}."
+        
+        # Alerta: Pod reiniciando frecuentemente
+        - alert: MADDPGPodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total{
+              container="maddpg-api"
+            }[15m]) * 60 * 15 > 3
+          for: 5m
+          labels:
+            severity: critical
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG pod is crash looping"
+            description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes."
+    
+    # ========================================
+    # Alertas de Rendimiento
+    # ========================================
+    - name: maddpg-performance
+      interval: 30s
+      rules:
+        # Alerta: Latencia alta
+        - alert: MADDPGHighLatency
+          expr: |
+            histogram_quantile(0.95, 
+              sum(rate(maddpg_inference_latency_seconds_bucket[5m])) by (le)
+            ) > 0.5
+          for: 5m
+          labels:
+            severity: warning
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG inference latency is high"
+            description: "95th percentile inference latency is {{ $value | humanizeDuration }}."
+        
+        # Alerta: Latencia muy alta (crítica)
+        - alert: MADDPGCriticalLatency
+          expr: |
+            histogram_quantile(0.99, 
+              sum(rate(maddpg_inference_latency_seconds_bucket[5m])) by (le)
+            ) > 2.0
+          for: 2m
+          labels:
+            severity: critical
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG inference latency is critically high"
+            description: "99th percentile inference latency is {{ $value | humanizeDuration }}."
+        
+        # Alerta: Tasa de errores alta
+        - alert: MADDPGHighErrorRate
+          expr: |
+            sum(rate(maddpg_inference_requests_total{status="error"}[5m]))
+            / sum(rate(maddpg_inference_requests_total[5m])) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG error rate is high"
+            description: "Error rate is {{ $value | humanizePercentage }} over the last 5 minutes."
+        
+        # Alerta: Tasa de errores crítica
+        - alert: MADDPGCriticalErrorRate
+          expr: |
+            sum(rate(maddpg_inference_requests_total{status="error"}[5m]))
+            / sum(rate(maddpg_inference_requests_total[5m])) > 0.10
+          for: 2m
+          labels:
+            severity: critical
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG error rate is critically high"
+            description: "Error rate is {{ $value | humanizePercentage }}. Immediate action required."
+    
+    # ========================================
+    # Alertas de Recursos
+    # ========================================
+    - name: maddpg-resources
+      interval: 30s
+      rules:
+        # Alerta: Uso de CPU alto
+        - alert: MADDPGHighCPUUsage
+          expr: |
+            sum(rate(container_cpu_usage_seconds_total{
+              container="maddpg-api"
+            }[5m])) by (pod)
+            / sum(container_spec_cpu_quota{
+              container="maddpg-api"
+            } / container_spec_cpu_period{
+              container="maddpg-api"
+            }) by (pod) > 0.80
+          for: 5m
+          labels:
+            severity: warning
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG high CPU usage"
+            description: "Pod {{ $labels.pod }} CPU usage is {{ $value | humanizePercentage }}."
+        
+        # Alerta: Uso de memoria alto
+        - alert: MADDPGHighMemoryUsage
+          expr: |
+            sum(container_memory_working_set_bytes{
+              container="maddpg-api"
+            }) by (pod)
+            / sum(container_spec_memory_limit_bytes{
+              container="maddpg-api"
+            }) by (pod) > 0.80
+          for: 5m
+          labels:
+            severity: warning
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG high memory usage"
+            description: "Pod {{ $labels.pod }} memory usage is {{ $value | humanizePercentage }}."
+        
+        # Alerta: GPU no disponible (si se espera GPU)
+        - alert: MADDPGGPUNotAvailable
+          expr: maddpg_gpu_available == 0
+          for: 5m
+          labels:
+            severity: warning
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG GPU not available"
+            description: "GPU is not available for inference. Using CPU fallback."
+        
+        # Alerta: Memoria GPU alta
+        - alert: MADDPGHighGPUMemory
+          expr: |
+            maddpg_gpu_memory_used_bytes / maddpg_gpu_memory_total_bytes > 0.90
+          for: 5m
+          labels:
+            severity: warning
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG GPU memory usage is high"
+            description: "GPU memory usage is {{ $value | humanizePercentage }}."
+    
+    # ========================================
+    # Alertas del Modelo
+    # ========================================
+    - name: maddpg-model
+      interval: 30s
+      rules:
+        # Alerta: Modelo no cargado
+        - alert: MADDPGModelNotLoaded
+          expr: maddpg_model_loaded == 0
+          for: 2m
+          labels:
+            severity: critical
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG model is not loaded"
+            description: "The MADDPG model failed to load. Check the logs for details."
+        
+        # Alerta: Sin requests (posible problema)
+        - alert: MADDPGNoRequests
+          expr: |
+            sum(rate(maddpg_inference_requests_total[10m])) == 0
+          for: 15m
+          labels:
+            severity: info
+            service: maddpg-citylearn
+          annotations:
+            summary: "MADDPG receiving no requests"
+            description: "No inference requests received in the last 15 minutes. Verify traffic routing."
+
+---
+# Grafana Dashboard ConfigMap
+# Para importar en Grafana
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maddpg-grafana-dashboard
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+    grafana_dashboard: "true"
+data:
+  maddpg-dashboard.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "red", "value": 80}
+                ]
+              }
+            }
+          },
+          "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+          "id": 1,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.0",
+          "targets": [
+            {
+              "expr": "sum(rate(maddpg_inference_requests_total[5m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Requests/sec",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "unit": "s"
+            }
+          },
+          "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+          "id": 2,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(maddpg_inference_latency_seconds_bucket[5m])) by (le))",
+              "legendFormat": "p95",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(maddpg_inference_latency_seconds_bucket[5m])) by (le))",
+              "legendFormat": "p99",
+              "refId": "B"
+            }
+          ],
+          "title": "Latency (p95/p99)",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "unit": "percentunit"
+            }
+          },
+          "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+          "id": 3,
+          "targets": [
+            {
+              "expr": "sum(rate(maddpg_inference_requests_total{status=\"error\"}[5m])) / sum(rate(maddpg_inference_requests_total[5m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Error Rate",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+          "id": 4,
+          "targets": [
+            {
+              "expr": "maddpg_service_uptime_seconds",
+              "refId": "A"
+            }
+          ],
+          "title": "Uptime",
+          "type": "stat",
+          "fieldConfig": {"defaults": {"unit": "s"}}
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": ["maddpg", "citylearn", "ml"],
+      "templating": {"list": []},
+      "time": {"from": "now-1h", "to": "now"},
+      "timepicker": {},
+      "timezone": "",
+      "title": "MADDPG CityLearn Dashboard",
+      "uid": "maddpg-citylearn",
+      "version": 1
+    }

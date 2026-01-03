@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: maddpg-citylearn-ingress
+  namespace: default
+  annotations:
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: maddpg-citylearn.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: maddpg-citylearn-service
+            port:
+              number: 80
+  # TLS configuration (uncomment for HTTPS)
+  # tls:
+  # - hosts:
+  #   - maddpg-citylearn.example.com
+  #   secretName: maddpg-citylearn-tls

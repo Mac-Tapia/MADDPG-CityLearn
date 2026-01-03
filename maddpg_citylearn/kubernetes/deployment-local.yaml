@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maddpg-citylearn
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+    version: v1
+spec:
+  replicas: 1  # Solo 1 réplica para desarrollo local
+  selector:
+    matchLabels:
+      app: maddpg-citylearn
+  template:
+    metadata:
+      labels:
+        app: maddpg-citylearn
+        version: v1
+    spec:
+      containers:
+      - name: maddpg-api
+        image: maddpg-citylearn:latest
+        imagePullPolicy: Never  # Usar imagen local
+        
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        
+        # Environment variables
+        env:
+        - name: PYTHONPATH
+          value: "/app/src"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: API_HOST
+          value: "0.0.0.0"
+        - name: API_PORT
+          value: "8000"
+        
+        # Resource requests and limits (sin GPU para K8s local)
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        
+        # Liveness probe
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        
+        # Readiness probe
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+      # No security context restrictivo para desarrollo local
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maddpg-citylearn-svc
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: maddpg-citylearn
+  ports:
+  - port: 8000
+    targetPort: 8000
+    nodePort: 30080  # Accesible en localhost:30080
+    name: http

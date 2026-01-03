@@ -1,0 +1,21 @@
+# CityLearn v2 - Instalación Independiente
+# Este archivo debe instalarse DESPUÉS de requirements.txt
+#
+# Comandos de instalación (en orden):
+# 1. pip install citylearn==2.5.0 --no-deps
+# 2. pip install gymnasium==0.28.1 pandas scikit-learn<=1.2.2 simplejson torchvision
+#
+# NOTA: Las siguientes dependencias de CityLearn NO se instalan porque requieren
+# openstudio que no está disponible en PyPI para Windows/Python 3.11:
+#   - doe-xstock>=1.1.0 (requiere openstudio<=3.3.0)
+#   - nrel-pysam (opcional, para simulaciones solares)
+#   - openstudio<=3.3.0 (no disponible en PyPI)
+#
+# El proyecto MADDPG puede funcionar sin estas dependencias usando esquemas básicos
+# de CityLearn que no requieren simulaciones de OpenStudio.
+
+# Instalación manual requerida (copiar estos comandos):
+# pip install citylearn==2.5.0 --no-deps
+# pip install gymnasium==0.28.1 pandas "scikit-learn<=1.2.2" simplejson torchvision
+
+

@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maddpg-citylearn
+  namespace: default
+  labels:
+    app: maddpg-citylearn
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: maddpg-citylearn
+  template:
+    metadata:
+      labels:
+        app: maddpg-citylearn
+        version: v1
+    spec:
+      # Security context for pod
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+        
+      containers:
+      - name: maddpg-api
+        image: maddpg-citylearn:latest
+        imagePullPolicy: IfNotPresent
+        
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        
+        # Environment variables
+        env:
+        - name: PYTHONPATH
+          value: "/app/src"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: API_HOST
+          value: "0.0.0.0"
+        - name: API_PORT
+          value: "8000"
+        
+        # Resource requests and limits
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+            # GPU: descomentar para soporte NVIDIA
+            # nvidia.com/gpu: "1"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+            # GPU: descomentar para soporte NVIDIA
+            # nvidia.com/gpu: "1"
+        
+        # Liveness probe - checks if container is alive
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 40
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        
+        # Readiness probe - checks if container is ready to serve traffic
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        # Volume mounts
+        volumeMounts:
+        - name: models
+          mountPath: /app/models
+          readOnly: true
+        - name: configs
+          mountPath: /app/configs
+          readOnly: true
+        - name: logs
+          mountPath: /app/logs
+        
+        # Security context for container
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+      
+      # Volumes
+      volumes:
+      - name: models
+        persistentVolumeClaim:
+          claimName: maddpg-models-pvc
+      - name: configs
+        configMap:
+          name: maddpg-config
+      - name: logs
+        emptyDir: {}
+      
+      # Restart policy
+      restartPolicy: Always
+      
+      # Tolerations para nodos GPU (descomentar si usa GPU)
+      # tolerations:
+      # - key: "nvidia.com/gpu"
+      #   operator: "Exists"
+      #   effect: "NoSchedule"
+      
+      # Node selector (descomentar según necesidad)
+      # nodeSelector:
+      #   # Para nodos CPU optimizados:
+      #   # node-type: cpu-optimized
+      #   # Para nodos con GPU:
+      #   # accelerator: nvidia-gpu
+      
+      # Affinity rules (uncomment for production)
+      # affinity:
+      #   podAntiAffinity:
+      #     preferredDuringSchedulingIgnoredDuringExecution:
+      #     - weight: 100
+      #       podAffinityTerm:
+      #         labelSelector:
+      #           matchExpressions:
+      #           - key: app
+      #             operator: In
+      #             values:
+      #             - maddpg-citylearn
+      #         topologyKey: kubernetes.io/hostname
