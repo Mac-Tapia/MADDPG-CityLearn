@@ -181,8 +181,8 @@ class MADDPG:
 
             agent.critic_optim.zero_grad()
             critic_loss.backward()
-            torch.nn.utils.clip_grad_norm_(
-                agent.critic.parameters(), max_norm=1.0
+            torch.nn.utils.clip_grad_value_(
+                agent.critic.parameters(), clip_value=1.0
             )
             agent.critic_optim.step()
 
@@ -200,8 +200,8 @@ class MADDPG:
 
             agent.actor_optim.zero_grad()
             actor_loss.backward()
-            torch.nn.utils.clip_grad_norm_(
-                agent.actor.parameters(), max_norm=1.0
+            torch.nn.utils.clip_grad_value_(
+                agent.actor.parameters(), clip_value=1.0
             )
             agent.actor_optim.step()
 

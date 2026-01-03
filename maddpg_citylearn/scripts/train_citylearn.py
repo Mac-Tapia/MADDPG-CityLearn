@@ -1,8 +1,23 @@
-# TODO: pegar aquí el código de train_citylearn.py
+"""
+Entrenamiento MADDPG para CityLearn v2.
+Optimizado para valley-filling, autoconsumo FV y ahorro VE.
+"""
 import os
+import sys
 import json
+import signal
 
 import numpy as np
+import torch
+
+# Ignorar señales de interrupción para evitar KeyboardInterrupt durante entrenamiento CUDA
+if sys.platform == 'win32':
+    # En Windows, ignorar CTRL+C y CTRL+BREAK
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    try:
+        signal.signal(signal.SIGBREAK, signal.SIG_IGN)
+    except AttributeError:
+        pass
 
 from maddpg_tesis.core.config import load_config
 from maddpg_tesis.core.logging import get_logger, setup_logging
@@ -49,30 +64,40 @@ def main():
     setup_logging()
     logger = get_logger("train_citylearn")
 
+    # Optimizaciones GPU
+    if torch.cuda.is_available():
+        torch.backends.cudnn.benchmark = True
+        torch.backends.cuda.matmul.allow_tf32 = True
+        logger.info(f"GPU: {torch.cuda.get_device_name(0)}")
+
     cfg = load_config()
     set_global_seeds(cfg.training.seed)
 
-    # Inicializar entorno con dataset que incluye EVs y recursos distribuidos
-    # citylearn_challenge_2022_phase_all_plus_evs incluye:
-    # - Edificios con diferentes perfiles (residencial, comercial)
-    # - Vehículos eléctricos (EVs) como cargas controlables
-    # - Generación solar fotovoltaica
-    # - Sistemas de almacenamiento de energía (baterías)
-    # - Cargas térmicas (HVAC, DHW)
-    env = CityLearnMultiAgentEnv(
-        schema=cfg.env.schema,
-        central_agent=False,
-        simulation_start_time_step=cfg.env.simulation_start_time_step,
-        simulation_end_time_step=cfg.env.simulation_end_time_step,
-        reward_function=cfg.env.reward_function,
-        random_seed=cfg.training.seed,
-    )
+    # Inicializar entorno CityLearn (con reintentos para evitar KeyboardInterrupt)
+    logger.info("Inicializando entorno CityLearn...")
+    max_retries = 3
+    env = None
+    for attempt in range(max_retries):
+        try:
+            env = CityLearnMultiAgentEnv(
+                schema=cfg.env.schema,
+                central_agent=False,
+                simulation_start_time_step=cfg.env.simulation_start_time_step,
+                simulation_end_time_step=cfg.env.simulation_end_time_step,
+                reward_function=cfg.env.reward_function,
+                random_seed=cfg.training.seed,
+            )
+            break
+        except KeyboardInterrupt:
+            if attempt < max_retries - 1:
+                logger.warning(f"Intento {attempt+1} falló, reintentando...")
+                continue
+            else:
+                raise
 
     logger.info(
-        "Entorno CityLearn inicializado: n_agents=%d, obs_dim=%d, action_dim=%d",
-        env.n_agents,
-        env.obs_dim,
-        env.action_dim,
+        "Entorno listo: n_agents=%d, obs_dim=%d, action_dim=%d",
+        env.n_agents, env.obs_dim, env.action_dim,
     )
 
     maddpg = MADDPG(
@@ -82,7 +107,15 @@ def main():
         cfg=cfg.maddpg,
     )
 
-    # Crear directorio de checkpoints una sola vez
+    # Cargar checkpoint existente si hay
+    checkpoint_path = os.path.join(cfg.training.save_dir, "maddpg.pt")
+    if os.path.exists(checkpoint_path):
+        try:
+            maddpg.load(checkpoint_path)
+            logger.info(f"Checkpoint cargado: {checkpoint_path}")
+        except Exception as e:
+            logger.warning(f"No se pudo cargar checkpoint: {e}")
+
     os.makedirs(cfg.training.save_dir, exist_ok=True)
 
     best_reward = -1e9
@@ -95,6 +128,7 @@ def main():
         steps = 0
 
         while True:
+            # Bloque protegido contra KeyboardInterrupt
             actions = maddpg.select_actions(obs, noise=True)
             next_obs, rewards, done, info = env.step(actions)
 

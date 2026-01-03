@@ -1,0 +1,47 @@
+env:
+  name: citylearn
+  dataset: citylearn_challenge_2022_phase_all_plus_evs
+  reward_function: custom_weighted
+  central_agent: false
+  buildings: null
+maddpg:
+  actor_lr: 0.0003
+  critic_lr: 0.0003
+  gamma: 0.99
+  tau: 0.005
+  batch_size: 512
+  buffer_size: 500000
+  hidden_dim: 400
+  hidden_layers:
+  - 400
+  - 300
+  noise_std: 0.2
+  noise_decay: 0.9995
+  noise_min: 0.05
+  update_freq: 1
+  gradient_clip: 0.5
+training:
+  num_episodes: 100
+  max_steps: 8760
+  eval_freq: 10
+  save_freq: 10
+  warmup_steps: 10000
+  updates_per_step: 2
+reward:
+  cost_weight: 0.3
+  emission_weight: 0.25
+  peak_weight: 0.25
+  comfort_weight: 0.1
+  grid_weight: 0.1
+  solar_utilization_bonus: 0.05
+  ev_offpeak_bonus: 0.05
+  coordination_bonus: 0.02
+  action_penalty: 0.01
+  peak_hour_penalty: 0.03
+exploration:
+  type: ou_noise
+  theta: 0.15
+  sigma: 0.2
+  epsilon_start: 1.0
+  epsilon_end: 0.05
+  epsilon_decay: 50000

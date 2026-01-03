@@ -59,8 +59,5 @@ class DDPGAgent:
 
     def act(self, obs: torch.Tensor) -> torch.Tensor:
         """Política determinista (sin ruido)."""
-        self.actor.eval()
         with torch.no_grad():
-            action = self.actor(obs)
-        self.actor.train()
-        return action
+            return self.actor(obs)

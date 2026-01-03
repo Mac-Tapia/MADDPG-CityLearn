@@ -5,41 +5,48 @@ env:
   simulation_start_time_step: null
   simulation_end_time_step: null
   reward_function: null
-  # Pesos para recompensa personalizada orientada a FLEXIBILIDAD ENERGÉTICA
-  # Ajustar según prioridad del objetivo de tesis
+  # PESOS OPTIMIZADOS PARA:
+  # 1. Valley-filling distribuido (repartir carga en valles)
+  # 2. Máximo autoconsumo FV (usar solar cuando disponible)
+  # 3. Ahorro 38% en carga VE (cargar en horas baratas/solares)
   reward_weights:
-    cost: 1.0         # penaliza costo energético (respuesta a precio dinámico)
-    peak: 0.5         # penaliza picos de demanda (peak shaving)
-    co2: 0.3          # penaliza emisiones de carbono
-    discomfort: 0.2   # penaliza disconfort térmico (restricción de confort)
+    cost: 2.0              # MÁXIMA prioridad: reducir costo total
+    peak: 2.5              # CRÍTICO: valley-filling = minimizar picos
+    co2: 1.5               # Importante: reducir emisiones
+    discomfort: 0.1        # Bajo: priorizar eficiencia sobre confort
+    # Pesos adicionales para FV y VE
+    solar_penalty: 1.5     # Penalizar NO usar generación solar
+    ev_cost: 2.0           # Priorizar ahorro en carga VE
+    valley_bonus: 1.5      # Bonus por cargar en valles (off-peak)
 
 maddpg:
-  gamma: 0.95               # Reducido: horizonte más corto para señales más claras
-  tau: 0.005                # Estándar para DDPG/MADDPG
-  actor_lr: 0.0003          # Learning rate estándar para Adam
-  critic_lr: 0.001          # Crítico aprende más rápido que actor
+  # Configuracion optimizada para GPU RTX 4060 - CUDA MÁXIMO
+  # Ajustada para evitar KeyboardInterrupt en backward() con protección robusta
+  gamma: 0.99
+  tau: 0.005
+  actor_lr: 0.0003
+  critic_lr: 0.0005
   hidden_dim: 256
-  buffer_size: 100000       # Suficiente para ~11 episodios completos
-  batch_size: 256           # Estándar
-  device: "cuda"
-  exploration_initial_std: 0.3    # Buena exploración inicial
-  exploration_final_std: 0.05     # Exploración mínima al final
-  exploration_decay_steps: 150000 # Decae en ~17 episodios (~85% del training)
-  update_after: 8760        # Esperar 1 episodio completo antes de entrenar
-  update_every: 50          # Actualizar cada 50 steps
-  updates_per_step: 1       # 1 update por ciclo
+  buffer_size: 500000
+  batch_size: 512             # Máximo para RTX 4060 (8GB GDDR6)
+  device: "cuda"              # GPU CUDA exclusivamente
+  exploration_initial_std: 0.3
+  exploration_final_std: 0.02
+  exploration_decay_steps: 300000
+  update_after: 2000
+  update_every: 10            # Updates regulares
+  updates_per_step: 2         # Máximo training por episodio
 
 training:
-  episodes: 10              # 10 episodios
+  episodes: 50
   log_every: 1
   max_steps_per_episode: null
   seed: 42
-  save_dir: "models/citylearn_maddpg"  # Carpeta limpia
-  # Validación offline y early stopping
-  val_every: 5
-  val_episodes: 1           # 1 episodio de validación (rápido)
-  early_stopping_patience: 6     # Más paciencia
-  early_stopping_min_delta: 100.0  # Mejora significativa requerida
+  save_dir: "models/citylearn_maddpg"
+  val_every: 10
+  val_episodes: 1
+  early_stopping_patience: 15
+  early_stopping_min_delta: 50.0
 
 api:
   host: "0.0.0.0"
