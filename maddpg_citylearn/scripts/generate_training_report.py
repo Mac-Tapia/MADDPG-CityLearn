@@ -14,8 +14,8 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-# Directorio de resultados
-RESULTS_DIR = ROOT / "models" / "citylearn_maddpg_backup_v1"
+# Directorio de resultados - usar directorio actual, no backup
+RESULTS_DIR = ROOT / "models" / "citylearn_maddpg"
 OUTPUT_DIR = ROOT / "reports"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
