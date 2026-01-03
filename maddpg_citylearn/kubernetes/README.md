@@ -1,4 +1,8 @@
-# Guía de Despliegue en Kubernetes - MADDPG CityLearn
+# Guía de Despliegue en Kubernetes - CooperativeMADDPG CityLearn
+
+## Descripción
+
+Despliegue de **CooperativeMADDPG** (Multi-Agent Deep Deterministic Policy Gradient Cooperativo) con paradigma CTDE y Team Reward para control de flexibilidad energética en comunidades de edificios inteligentes.
 
 ## Requisitos Previos
 

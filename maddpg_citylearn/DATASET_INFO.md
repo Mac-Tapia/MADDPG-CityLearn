@@ -4,6 +4,13 @@
 
 Este dataset es parte del **CityLearn Challenge 2022** e incluye características avanzadas específicas para el control de flexibilidad energética en comunidades interactivas, incluyendo **vehículos eléctricos (EVs)**.
 
+### Uso en CooperativeMADDPG
+
+- **17 Agentes Cooperativos**: Un agente por edificio con Team Reward
+- **Paradigma CTDE**: Entrenamiento centralizado, ejecución descentralizada
+- **Coordinación**: Mean-Field + Attention entre edificios
+- **5 KPIs Globales**: Cost, Carbon, Ramping, Load Factor, Electricity
+
 ## Características del Dataset
 
 ### 🏢 Edificios

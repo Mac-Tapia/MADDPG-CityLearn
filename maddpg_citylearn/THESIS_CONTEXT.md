@@ -1,20 +1,27 @@
-# Contexto de Investigación - Tesis
+# Contexto de Investigación - Tesis CooperativeMADDPG
 
 ## Tema de Tesis
 
-Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la Optimización de la Flexibilidad Energética en Comunidades Interactivas de Redes Eléctricas Inteligentes
+**Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la Optimización de la Flexibilidad Energética en Comunidades Interactivas de Redes Eléctricas Inteligentes**
 
 ## Objetivo de Investigación
 
-Desarrollar e implementar un sistema multi-agente basado en Deep Reinforcement Learning (específicamente MADDPG) para controlar de manera óptima y coordinada la flexibilidad energética en comunidades de edificios inteligentes que interactúan con redes eléctricas inteligentes.
+Desarrollar e implementar un sistema multi-agente **cooperativo** basado en Deep Reinforcement Learning (específicamente **CooperativeMADDPG**) para controlar de manera óptima y coordinada la flexibilidad energética en comunidades de edificios inteligentes que interactúan con redes eléctricas inteligentes.
+
+### Paradigma: CTDE (Centralized Training, Decentralized Execution)
+
+- **Entrenamiento Centralizado**: Critic global ve estados/acciones de todos los 17 agentes
+- **Ejecución Descentralizada**: Cada actor solo usa observación local + hints de coordinación
+- **Team Reward**: Todos los agentes reciben la MISMA recompensa basada en métricas globales del distrito
 
 ## Componentes Clave de la Investigación
 
-### 1. Sistema Multi-Agente
+### 1. Sistema Multi-Agente Cooperativo (CTDE)
 
-- **Agentes Autónomos**: Cada edificio/unidad de la comunidad opera como un agente independiente
-- **Coordinación Distribuida**: Los agentes aprenden a coordinar sus acciones para optimización global
-- **Descentralización**: Ejecución local autónoma tras entrenamiento centralizado
+- **17 Agentes Autónomos**: Cada edificio opera como un agente con Actor local
+- **Coordinación Explícita**: Módulos de Mean-Field + Attention para comunicación
+- **Team Reward**: Recompensa global compartida por todos los agentes
+- **Ejecución Descentralizada**: Actor local + hints de coordinación
 
 ### 2. Control de Flexibilidad Energética
 
@@ -48,22 +55,26 @@ Las comunidades energéticas representan agregaciones de edificios que:
 - Contratos de compra/venta con utilities
 - Participación en mercados de flexibilidad
 
-### 4. Aprendizaje Profundo por Refuerzo Multi-Agente
+### 4. Aprendizaje Profundo por Refuerzo Multi-Agente Cooperativo
 
-**¿Por qué MADDPG?**
+**¿Por qué CooperativeMADDPG?**
 
-1. **Acciones Continuas**: Control fino de setpoints de temperatura, carga de baterías
-2. **Multi-Agente**: Múltiples edificios operando simultáneamente
-3. **Coordinación**: Crítico centralizado observa acciones de todos los agentes
-4. **Escalabilidad**: Agrega nuevos edificios sin rediseño total
-5. **Off-Policy**: Aprendizaje eficiente de datos históricos
+1. **Acciones Continuas**: Control fino de baterías, HVAC, DHW
+2. **Multi-Agente Cooperativo**: 17 edificios con recompensa compartida
+3. **CTDE**: Critic centralizado + Actores descentralizados
+4. **Coordinación Explícita**: Mean-Field + Attention entre agentes
+5. **Off-Policy**: Aprendizaje eficiente con Replay Buffer compartido
+6. **Team Reward**: Optimización global del distrito
 
 **Componentes del Algoritmo:**
 
-- **Actor Descentralizado**: Cada edificio tiene su propia política de control
-- **Crítico Centralizado**: Evalúa valor de acciones conjuntas considerando todos los agentes
-- **Target Networks**: Estabilidad en entrenamiento
-- **Replay Buffer**: Aprendizaje de experiencias pasadas
+- **CooperativeCoordinator**: Módulo de coordinación (Mean-Field + Attention)
+- **CoordinatedActor**: Actor con entrada de coordinación hints
+- **CoordinatedCritic**: Critic centralizado con estado global
+- **Team Reward**: Recompensa global para todos los agentes
+- **OrnsteinUhlenbeckNoise**: Ruido temporal correlacionado
+- **ObservationNormalizer**: Normalización running de observaciones
+- **Replay Buffer**: Memoria compartida de experiencias
 
 ## Caso de Uso: CityLearn Challenge 2022 Phase All + EVs
 

@@ -1,8 +1,8 @@
 # 📋 Reporte de Cumplimiento - Guía Integral 2025 para Despliegue de Modelos ML/DL/LLM
 
-**Proyecto**: MADDPG CityLearn - Control de Flexibilidad Energética  
-**Fecha**: 9 de diciembre de 2025  
-**Versión**: 1.1 (100% Compliance)  
+**Proyecto**: CooperativeMADDPG CityLearn - Control Cooperativo de Flexibilidad Energética  
+**Fecha**: 3 de enero de 2026  
+**Versión**: 2.0 (100% Compliance + CTDE + Team Reward)  
 
 ---
 
@@ -33,9 +33,11 @@ Este documento presenta el cumplimiento del proyecto MADDPG CityLearn con respec
 ### 1.1 Tipo de Modelo
 | Criterio | Requerimiento | Implementación | Estado |
 |----------|---------------|----------------|--------|
-| Identificación del tipo | Definir si es ML/DL/LLM | **Deep Reinforcement Learning (MADDPG)** | ✅ |
-| Framework | Especificar framework usado | **PyTorch 2.5.1** | ✅ |
-| Tamaño del modelo | Documentar tamaño | **~90MB** (3 checkpoints) | ✅ |
+| Identificación del tipo | Definir si es ML/DL/LLM | **Deep RL Multi-Agente Cooperativo (CooperativeMADDPG)** | ✅ |
+| Paradigma | CTDE | **Centralized Training, Decentralized Execution** | ✅ |
+| Recompensa | Team Reward | **Recompensa global compartida por todos los agentes** | ✅ |
+| Framework | Especificar framework usado | **PyTorch 2.5.1 + CUDA 12.1** | ✅ |
+| Tamaño del modelo | Documentar tamaño | **~90MB** (3 checkpoints + coordinador) | ✅ |
 
 ### 1.2 Caso de Uso
 - **Dominio**: Control energético en edificios inteligentes

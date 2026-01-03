@@ -1,8 +1,12 @@
-# Implementación de Coordinación para MADDPG Cooperativo (CTDE)
+# Arquitectura de Coordinación - CooperativeMADDPG (CTDE)
+
+## Tema de Tesis
+
+**Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la Optimización de la Flexibilidad Energética en Comunidades Interactivas de Redes Eléctricas Inteligentes**
 
 ## Resumen de la Arquitectura
 
-Esta implementación extiende MADDPG con un **módulo de coordinación explícita** entre agentes para el problema de gestión energética de CityLearn.
+Esta implementación extiende MADDPG con un **módulo de coordinación explícita** entre agentes para el problema de gestión energética de CityLearn. El sistema utiliza el paradigma **CTDE** (Centralized Training, Decentralized Execution) con **Team Reward** para optimización cooperativa de 17 edificios.
 
 ## Paradigma CTDE (Centralized Training, Decentralized Execution)
 

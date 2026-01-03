@@ -1,4 +1,4 @@
-# Guía de Despliegue MADDPG CityLearn - Implementación Completa
+# Guía de Despliegue CooperativeMADDPG CityLearn - Implementación Completa
 
 ## 📋 Alineación con "Guía Integral 2025 para Despliegue de Modelos ML/DL/LLM"
 
@@ -10,11 +10,12 @@
 
 ## 1. Introducción
 
-Este documento presenta la **implementación completa** del despliegue del modelo MADDPG para control de flexibilidad energética, siguiendo paso a paso la guía de referencia del curso. El modelo entrena **17 agentes autónomos** (uno por edificio) que coordinan consumo, almacenamiento, generación distribuida y vehículos eléctricos para optimizar costos y reducir emisiones.
+Este documento presenta la **implementación completa** del despliegue del modelo **CooperativeMADDPG** para control de flexibilidad energética, siguiendo paso a paso la guía de referencia del curso. El modelo entrena **17 agentes cooperativos** (uno por edificio) con paradigma **CTDE** (Centralized Training, Decentralized Execution) y **Team Reward** para coordinar consumo, almacenamiento, generación distribuida y vehículos eléctricos.
 
-**Tipo de modelo**: Deep Reinforcement Learning Multi-Agente (MADDPG)  
+**Tipo de modelo**: Deep Reinforcement Learning Multi-Agente Cooperativo (CooperativeMADDPG)  
+**Paradigma**: CTDE con Team Reward  
 **Framework**: PyTorch 2.5.1 con CUDA 12.1  
-**Tamaño aproximado**: ~50MB (Actor/Critic networks por 17 agentes)  
+**Tamaño aproximado**: ~50MB (Actor/Critic networks + Coordinador por 17 agentes)  
 **Dataset**: CityLearn Challenge 2022 Phase All + EVs (17 edificios comerciales)
 
 ---

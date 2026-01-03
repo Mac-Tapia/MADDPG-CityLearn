@@ -1,10 +1,15 @@
-# MADDPG para Control de Flexibilidad Energética en Comunidades Interactivas
+# CooperativeMADDPG para Control de Flexibilidad Energética en Comunidades Inteligentes
 
 ## Tema de Tesis
 
-Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la Optimización de la Flexibilidad Energética en Comunidades Interactivas de Redes Eléctricas Inteligentes
+**Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la Optimización de la Flexibilidad Energética en Comunidades Interactivas de Redes Eléctricas Inteligentes**
 
-Implementación de Multi-Agent Deep Deterministic Policy Gradient (MADDPG) aplicado al control coordinado de edificios inteligentes en comunidades energéticas que interactúan con redes eléctricas inteligentes. El sistema permite gestionar de manera óptima la flexibilidad energética mediante agentes autónomos que aprenden a coordinar consumo, almacenamiento y generación distribuida para maximizar eficiencia y minimizar costos.
+Implementación de **Cooperative MADDPG** (Multi-Agent Deep Deterministic Policy Gradient) con paradigma **CTDE** (Centralized Training, Decentralized Execution) aplicado al control coordinado de edificios inteligentes en comunidades energéticas. El sistema utiliza:
+
+- 🤝 **Team Reward**: Todos los agentes reciben la misma recompensa global basada en métricas del distrito
+- 🧠 **Coordinación Explícita**: Módulos de Mean-Field + Attention para comunicación inter-agentes
+- 📊 **17 Edificios**: Dataset CityLearn Challenge 2022 Phase All + EVs
+- ⚡ **GPU Acelerada**: PyTorch 2.5.1 + CUDA 12.1 (RTX 4060)
 
 ## Instalación
 
@@ -43,11 +48,14 @@ pip install gymnasium==0.28.1 pandas "scikit-learn<=1.2.2" simplejson torchvisio
 
 ## Uso
 
-### Entrenamiento
+### Entrenamiento Cooperativo (CTDE + Team Reward)
 
 ```bash
 cd maddpg_citylearn
-python -m maddpg_tesis.scripts.train_citylearn
+$env:PYTHONPATH="src"; python -u scripts/train_citylearn.py
+
+# O usando el script cooperativo dedicado:
+$env:PYTHONPATH="src"; python -u scripts/train_cooperative.py
 ```
 
 ### API de Inferencia
@@ -65,15 +73,39 @@ docker run -p 8000:8000 -v $(pwd)/models:/app/models maddpg-citylearn
 
 ## Objetivo Principal
 
-Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la Optimización de la Flexibilidad Energética en Comunidades Interactivas de Redes Eléctricas Inteligentes
+**Sistema Multi-Agente de Aprendizaje Profundo por Refuerzo para la Optimización de la Flexibilidad Energética en Comunidades Interactivas de Redes Eléctricas Inteligentes**
 
-El sistema MADDPG entrena agentes autónomos (uno por edificio) que aprenden políticas coordinadas para:
+### Paradigma CTDE (Centralized Training, Decentralized Execution)
+
+```
+┌─────────────────────────────────────────────────┐
+│           ENTRENAMIENTO CENTRALIZADO            │
+│  ┌─────────────────────────────────────────┐   │
+│  │  COORDINADOR (Mean-Field + Attention)   │   │
+│  └─────────────────────────────────────────┘   │
+│                    ↓                            │
+│  ┌──────┐ ┌──────┐ ┌──────┐      ┌──────┐    │
+│  │Actor1│ │Actor2│ │Actor3│ ...  │Actor17│    │
+│  └──────┘ └──────┘ └──────┘      └──────┘    │
+│       ↓       ↓       ↓              ↓        │
+│  ┌─────────────────────────────────────────┐   │
+│  │     CRITIC CENTRALIZADO (Q-global)      │   │
+│  └─────────────────────────────────────────┘   │
+│       ↓                                        │
+│  ┌─────────────────────────────────────────┐   │
+│  │  TEAM REWARD (misma para todos)         │   │
+│  └─────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────┘
+```
+
+El sistema **CooperativeMADDPG** entrena 17 agentes autónomos (uno por edificio) con:
 
 - 📉 **Peak Shaving**: Reducir picos de demanda agregada de la comunidad
 - ⚡ **Valley Filling**: Desplazar consumo a horas de baja demanda
 - 🔋 **Self-Consumption**: Maximizar uso de generación solar local
 - 💰 **Cost Optimization**: Responder a señales de precio dinámico
 - 🌱 **Reducción de CO₂**: Minimizar emisiones asociadas al consumo
+- 🤝 **Coordinación**: Mecanismos de atención y mean-field entre agentes
 
 ### Recursos Controlables por Agente
 
@@ -84,17 +116,36 @@ El sistema MADDPG entrena agentes autónomos (uno por edificio) que aprenden pol
 | HVAC | Setpoints temperatura |
 | DHW (Agua caliente) | Scheduling |
 
-### Función de Recompensa Personalizable
+### Team Reward (Recompensa Cooperativa)
 
-La recompensa pondera múltiples objetivos de flexibilidad:
+Todos los agentes reciben la **misma recompensa global** basada en métricas del distrito:
 
-```yaml
-reward_weights:
-  cost: 1.0       # Penaliza costo energético
-  peak: 0.5       # Penaliza picos de demanda
-  co2: 0.3        # Penaliza emisiones
-  discomfort: 0.2 # Penaliza disconfort térmico
+```python
+# reward_functions.py - Team Reward
+def calculate_team_reward(env) -> List[float]:
+    total_cost = sum(b.net_electricity_consumption_cost[-1] for b in buildings)
+    total_emissions = sum(b.net_electricity_consumption_emission[-1] for b in buildings)
+    global_ramping = abs(current_total - previous_total)
+    load_factor = np.var(consumptions)
+    
+    team_reward = -(
+        weights.cost * total_cost +
+        weights.carbon * total_emissions +
+        weights.ramping * global_ramping +
+        weights.load_factor * load_factor
+    )
+    return [team_reward] * n_buildings  # MISMA para todos
 ```
+
+### Métricas de Evaluación (5 KPIs)
+
+| Métrica | Peso | Descripción |
+|---------|------|-------------|
+| **Cost** | 25% | Costo energético total del distrito |
+| **Carbon** | 25% | Emisiones de CO₂ totales |
+| **Ramping** | 20% | Cambios abruptos en demanda |
+| **Load Factor** | 15% | Factor de carga (pico vs promedio) |
+| **Electricity** | 15% | Consumo eléctrico total |
 
 ## Alineación con "Guía Integral 2025 para Despliegue de Modelos ML/DL/LLM"
 
