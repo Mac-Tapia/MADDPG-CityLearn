@@ -159,15 +159,22 @@ def main():
         cfg = load_config()
         set_global_seeds(cfg.training.seed)
         
-        # Optimizaciones CUDA
+        # Optimizaciones CUDA para máximo rendimiento
         if torch.cuda.is_available():
             torch.backends.cudnn.benchmark = True
             torch.backends.cuda.matmul.allow_tf32 = True
             torch.backends.cudnn.allow_tf32 = True
-            # Limpiar cache GPU al inicio
+            # Habilitar flash attention si está disponible (PyTorch 2.0+)
+            if hasattr(torch.backends.cuda, 'enable_flash_sdp'):
+                torch.backends.cuda.enable_flash_sdp(True)
+            # Configurar para máximo rendimiento
+            torch.cuda.set_device(0)
             torch.cuda.empty_cache()
-            logger.info("CUDA optimizado: benchmark=True, TF32=True, GPU=%s", 
-                       torch.cuda.get_device_name(0))
+            # Info de GPU
+            gpu_name = torch.cuda.get_device_name(0)
+            gpu_mem = torch.cuda.get_device_properties(0).total_memory / 1e9
+            logger.info("CUDA optimizado: benchmark=True, TF32=True")
+            logger.info("GPU: %s (%.2f GB VRAM)", gpu_name, gpu_mem)
         else:
             logger.warning("CUDA no disponible, usando CPU")
 

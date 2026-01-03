@@ -20,6 +20,7 @@ class MADDPG:
     - Actores descentralizados (uno por edificio/agente).
     - Entrenamiento off-policy con replay buffer.
     - Manejo robusto de errores y datos inválidos.
+    - Optimizado para GPU (RTX 4060 / RTX 4090).
     """
 
     def __init__(
@@ -35,6 +36,10 @@ class MADDPG:
         self.cfg = cfg
 
         self.device = get_device(cfg.device)
+        
+        # Habilitar modo de alto rendimiento para CUDA
+        if self.device.type == 'cuda':
+            torch.backends.cudnn.benchmark = True
 
         global_obs_dim = n_agents * obs_dim
         global_action_dim = n_agents * action_dim
@@ -181,6 +186,7 @@ class MADDPG:
         try:
             batch = self.replay_buffer.sample(self.cfg.batch_size)
 
+            # Transferir a GPU de forma eficiente (non_blocking=True)
             obs = to_tensor(batch["obs"], self.device)
             actions = to_tensor(batch["actions"], self.device)
             rewards = to_tensor(batch["rewards"], self.device)
@@ -193,20 +199,22 @@ class MADDPG:
 
             B = obs.shape[0]
 
+            # Operaciones vectorizadas para mejor uso de GPU
             global_obs = obs.view(B, -1)
             global_actions = actions.view(B, -1)
             global_next_obs = next_obs.view(B, -1)
 
             metrics: Dict[str, float] = {}
+            
+            # Pre-calcular todas las acciones target de una vez (más eficiente en GPU)
+            with torch.no_grad():
+                all_next_actions = []
+                for j, agent in enumerate(self.agents):
+                    all_next_actions.append(agent.target_actor(next_obs[:, j, :]))
+                target_global_next_actions = torch.cat(all_next_actions, dim=-1)
 
             for agent_idx, agent in enumerate(self.agents):
-                # acciones target para todos los agentes
-                next_actions_list = []
-                for j, other_agent in enumerate(self.agents):
-                    next_obs_j = next_obs[:, j, :]
-                    with torch.no_grad():
-                        next_actions_list.append(other_agent.target_actor(next_obs_j))
-                target_global_next_actions = torch.cat(next_actions_list, dim=-1)
+                # Usar acciones target pre-calculadas (más eficiente)
 
                 # crítico target (centralizado)
                 with torch.no_grad():

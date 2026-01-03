@@ -18,28 +18,28 @@ maddpg:
   tau: 0.005                # Estándar para DDPG/MADDPG
   actor_lr: 0.0003          # Learning rate estándar para Adam
   critic_lr: 0.001          # Crítico aprende más rápido que actor
-  hidden_dim: 256
-  buffer_size: 100000       # Suficiente para ~11 episodios completos
-  batch_size: 256           # Estándar
-  device: "cuda"
+  hidden_dim: 256           # Balance rendimiento/memoria para RTX 4060
+  buffer_size: 200000       # ~23 episodios, mejor diversidad de experiencias
+  batch_size: 512           # Optimizado para RTX 4060 8GB - mayor throughput
+  device: "cuda"            # GPU RTX 4060 Laptop
   exploration_initial_std: 0.3    # Buena exploración inicial
   exploration_final_std: 0.05     # Exploración mínima al final
   exploration_decay_steps: 150000 # Decae en ~17 episodios (~85% del training)
   update_after: 8760        # Esperar 1 episodio completo antes de entrenar
-  update_every: 50          # Actualizar cada 50 steps
-  updates_per_step: 1       # 1 update por ciclo
+  update_every: 25          # Actualizar cada 25 steps - más updates por episodio
+  updates_per_step: 2       # 2 updates por ciclo - aprovechar GPU
 
 training:
-  episodes: 10              # 10 episodios
-  log_every: 1
-  max_steps_per_episode: null
+  episodes: 50              # 50 episodios para convergencia adecuada
+  log_every: 1              # Log cada episodio
+  max_steps_per_episode: null  # Episodio completo (8760 steps/año)
   seed: 42
-  save_dir: "models/citylearn_maddpg"  # Carpeta limpia
+  save_dir: "models/citylearn_maddpg"
   # Validación offline y early stopping
-  val_every: 5
+  val_every: 5              # Validar cada 5 episodios
   val_episodes: 1           # 1 episodio de validación (rápido)
-  early_stopping_patience: 6     # Más paciencia
-  early_stopping_min_delta: 100.0  # Mejora significativa requerida
+  early_stopping_patience: 10    # 10 validaciones sin mejora = 50 episodios
+  early_stopping_min_delta: 50.0  # Delta más razonable para convergencia gradual
 
 api:
   host: "0.0.0.0"
