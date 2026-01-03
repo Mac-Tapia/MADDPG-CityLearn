@@ -1,0 +1,43 @@
+# GitHub Actions: Auto-commit de cambios
+# Ejecuta automáticamente cuando hay cambios en el repositorio local
+
+name: Auto Sync Repository
+
+on:
+  # Ejecutar manualmente
+  workflow_dispatch:
+  
+  # Ejecutar cada hora (opcional - descomenta si quieres)
+  # schedule:
+  #   - cron: '0 * * * *'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          
+      - name: Check for changes
+        id: changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Commit and push if changed
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          git add -A
+          git commit -m "chore: Auto-sync $(date +'%Y-%m-%d %H:%M:%S')"
+          git push

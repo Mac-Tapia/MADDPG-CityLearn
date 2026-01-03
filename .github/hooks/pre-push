@@ -1,0 +1,18 @@
+#!/bin/sh
+# Git pre-push hook - Verifica antes de push
+
+echo "========================================"
+echo "  Pre-push verification"
+echo "========================================"
+
+# Verificar que no hay errores de sintaxis Python
+echo "[CHECK] Verificando sintaxis Python..."
+cd maddpg_citylearn
+python -m py_compile src/maddpg_tesis/maddpg/maddpg.py 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "[ERROR] Error de sintaxis en código Python"
+    exit 1
+fi
+
+echo "[OK] Verificación completada"
+exit 0
