@@ -591,6 +591,7 @@ class CooperativeMADDPG:
             "obs_dim": self.obs_dim,
             "action_dim": self.action_dim,
             "coordination_dim": self.coordination_dim,
+            "is_cooperative": True,  # Flag para identificar CooperativeMADDPG
             "maddpg_config": asdict(self.cfg),
             "coordinator": self.coordinator.state_dict(),
             "agents": [
