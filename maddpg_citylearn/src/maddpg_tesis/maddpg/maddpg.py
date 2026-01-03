@@ -8,8 +8,57 @@ import torch.nn.functional as F
 from ..core.config import MADDPGConfig
 from ..core.utils import get_device, soft_update, to_tensor
 from .agent import AgentConfig, DDPGAgent
-from .noise import GaussianNoiseScheduler
+from .noise import OrnsteinUhlenbeckNoise, GaussianNoiseScheduler
 from .replay_buffer import ReplayBuffer
+
+
+class ObservationNormalizer:
+    """
+    Normalización running de observaciones para estabilidad de entrenamiento.
+    
+    Esto es CRÍTICO para MADDPG porque las observaciones de CityLearn tienen
+    rangos muy diferentes: pricing [0, 0.5], consumption [0, 50+], SOC [0, 1].
+    
+    MARLISA usa normalización similar internamente en su regression model.
+    """
+    
+    def __init__(self, obs_dim: int, clip: float = 5.0, epsilon: float = 1e-8):
+        self.mean = np.zeros(obs_dim, dtype=np.float64)
+        self.var = np.ones(obs_dim, dtype=np.float64)
+        self.count = 1e-4
+        self.clip = clip
+        self.epsilon = epsilon
+        self.obs_dim = obs_dim
+        
+    def update(self, obs: np.ndarray) -> None:
+        """Actualiza estadísticas con nuevo batch de observaciones."""
+        batch_mean = np.mean(obs, axis=0)
+        batch_var = np.var(obs, axis=0)
+        batch_count = obs.shape[0] if obs.ndim > 1 else 1
+        
+        if obs.ndim == 1:
+            batch_mean = obs
+            batch_var = np.zeros_like(obs)
+            batch_count = 1
+        
+        self._update_from_moments(batch_mean, batch_var, batch_count)
+        
+    def _update_from_moments(self, batch_mean, batch_var, batch_count):
+        """Update usando Welford's online algorithm."""
+        delta = batch_mean - self.mean
+        total_count = self.count + batch_count
+        
+        self.mean = self.mean + delta * batch_count / total_count
+        m_a = self.var * self.count
+        m_b = batch_var * batch_count
+        M2 = m_a + m_b + np.square(delta) * self.count * batch_count / total_count
+        self.var = M2 / total_count
+        self.count = total_count
+        
+    def normalize(self, obs: np.ndarray) -> np.ndarray:
+        """Normaliza observaciones a ~N(0, 1)."""
+        normalized = (obs - self.mean) / np.sqrt(self.var + self.epsilon)
+        return np.clip(normalized, -self.clip, self.clip).astype(np.float32)
 
 
 class MADDPG:
@@ -19,8 +68,15 @@ class MADDPG:
     - Crítico centralizado (CTDE).
     - Actores descentralizados (uno por edificio/agente).
     - Entrenamiento off-policy con replay buffer.
-    - Manejo robusto de errores y datos inválidos.
+    - Normalización de observaciones para estabilidad.
+    - Ruido Ornstein-Uhlenbeck para mejor exploración.
     - Optimizado para GPU (RTX 4060 / RTX 4090).
+    
+    MEJORAS sobre MARLISA:
+    - Critic centralizado ve estado global de 17 edificios
+    - Target networks para estabilidad
+    - Normalización adaptativa de observaciones
+    - Exploración OU (más sofisticada que epsilon-greedy)
     """
 
     def __init__(
@@ -66,12 +122,22 @@ class MADDPG:
             action_dim=action_dim,
         )
 
-        self.noise = GaussianNoiseScheduler(
+        # === RUIDO ORNSTEIN-UHLENBECK (MEJOR QUE GAUSSIANO) ===
+        # OU produce exploración más coherente temporalmente,
+        # mejor para control continuo de energía
+        self.noise = OrnsteinUhlenbeckNoise(
             action_dim=action_dim,
-            initial_std=cfg.exploration_initial_std,
-            final_std=cfg.exploration_final_std,
-            decay_steps=cfg.exploration_decay_steps,
+            mu=0.0,
+            theta=0.15,
+            sigma=cfg.exploration_initial_std,
+            sigma_min=cfg.exploration_final_std,
+            sigma_decay=0.9999,  # Decay suave
         )
+        
+        # === NORMALIZACIÓN DE OBSERVACIONES ===
+        # Crítico para estabilidad con observaciones de diferentes escalas
+        self.obs_normalizer = ObservationNormalizer(obs_dim)
+        self._normalize_obs = True  # Flag para activar/desactivar
 
         self.total_steps = 0
 
@@ -96,8 +162,21 @@ class MADDPG:
         if np.any(np.isnan(obs)) or np.any(np.isinf(obs)):
             obs = np.nan_to_num(obs, nan=0.0, posinf=1.0, neginf=-1.0)
         
+        # Actualizar normalizer con observaciones (solo durante entrenamiento)
+        if noise and self._normalize_obs:
+            for i in range(self.n_agents):
+                self.obs_normalizer.update(obs[i])
+        
+        # Normalizar observaciones
+        if self._normalize_obs:
+            obs_normalized = np.stack([
+                self.obs_normalizer.normalize(obs[i]) for i in range(self.n_agents)
+            ])
+        else:
+            obs_normalized = obs
+        
         try:
-            obs_t = to_tensor(obs, self.device).float()
+            obs_t = to_tensor(obs_normalized, self.device).float()
             actions = []
 
             for i, agent in enumerate(self.agents):
@@ -109,13 +188,14 @@ class MADDPG:
             actions_np = actions_t.cpu().numpy()
 
             if noise:
+                # Usar ruido OU (correlacionado temporalmente)
                 noisy_actions = []
                 for agent_idx in range(self.n_agents):
                     eps = self.noise.sample()
                     noisy_actions.append(
                         np.clip(actions_np[agent_idx] + eps, -1.0, 1.0)
                     )
-                    self.noise.step()
+                self.noise.step()  # Un step global para decay
                 actions_np = np.stack(noisy_actions, axis=0)
 
             # Validación final
@@ -125,6 +205,10 @@ class MADDPG:
         except Exception as e:
             # En caso de error, devolver acciones neutras
             return np.zeros((self.n_agents, self.action_dim), dtype=np.float32)
+    
+    def reset_noise(self) -> None:
+        """Reset del ruido OU al inicio de cada episodio."""
+        self.noise.reset()
 
     def store_transition(
         self,

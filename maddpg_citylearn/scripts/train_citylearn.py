@@ -26,7 +26,7 @@ from maddpg_tesis.core.config import load_config
 from maddpg_tesis.core.logging import get_logger, setup_logging
 from maddpg_tesis.core.utils import set_global_seeds
 from maddpg_tesis.envs import CityLearnMultiAgentEnv
-from maddpg_tesis.maddpg import MADDPG
+from maddpg_tesis.maddpg import MADDPG, CooperativeMADDPG
 
 # Estado global para manejo de interrupciones
 _interrupted = False
@@ -70,13 +70,18 @@ def run_validation(cfg, maddpg, logger) -> Optional[float]:
     global _interrupted
     
     try:
+        # Configurar parámetros de las 4 métricas
+        use_4_metrics = getattr(cfg.env, 'use_4_metrics_reward', True)
+        reward_weights = getattr(cfg.env, 'reward_weights', None)
+        
         val_env = CityLearnMultiAgentEnv(
             schema=cfg.env.schema,
             central_agent=False,
             simulation_start_time_step=cfg.env.simulation_start_time_step,
             simulation_end_time_step=cfg.env.simulation_end_time_step,
-            reward_function=cfg.env.reward_function,
             random_seed=cfg.training.seed + 1234,
+            use_4_metrics_reward=use_4_metrics,
+            reward_weights=reward_weights,
         )
     except Exception as e:
         logger.warning("No se pudo crear entorno de validación: %r", e)
@@ -180,15 +185,36 @@ def main():
 
         # Inicializar entorno con manejo de errores
         logger.info("Inicializando entorno CityLearn...")
+        logger.info("Función de recompensa: 4 métricas principales (Cost, Carbon, Ramping, Load Factor)")
         try:
+            # Configurar parámetros de las 4 métricas
+            use_4_metrics = getattr(cfg.env, 'use_4_metrics_reward', True)
+            reward_weights = getattr(cfg.env, 'reward_weights', None)
+            cooperative = getattr(cfg.env, 'cooperative_reward', True)  # CTDE
+            
             env = CityLearnMultiAgentEnv(
                 schema=cfg.env.schema,
                 central_agent=False,
                 simulation_start_time_step=cfg.env.simulation_start_time_step,
                 simulation_end_time_step=cfg.env.simulation_end_time_step,
-                reward_function=cfg.env.reward_function,
                 random_seed=cfg.training.seed,
+                use_4_metrics_reward=use_4_metrics,
+                reward_weights=reward_weights,
+                cooperative=cooperative,  # TEAM REWARD para CTDE
             )
+            
+            if cooperative:
+                logger.info("MODO COOPERATIVO (CTDE) ACTIVADO: Team Reward")
+                
+            if use_4_metrics:
+                if reward_weights:
+                    logger.info("Pesos de métricas: cost=%.2f, carbon=%.2f, ramping=%.2f, load_factor=%.2f",
+                               reward_weights.get('cost', 0.25),
+                               reward_weights.get('carbon', 0.25),
+                               reward_weights.get('ramping', 0.25),
+                               reward_weights.get('load_factor', 0.25))
+                else:
+                    logger.info("Pesos de métricas: balanceados (25% cada una)")
         except Exception as e:
             logger.error("Error inicializando entorno: %r", e)
             logger.error(traceback.format_exc())
@@ -199,19 +225,39 @@ def main():
             env.n_agents, env.obs_dim, env.action_dim,
         )
 
-        # Inicializar MADDPG
-        logger.info("Inicializando MADDPG...")
-        try:
-            maddpg = MADDPG(
-                n_agents=env.n_agents,
-                obs_dim=env.obs_dim,
-                action_dim=env.action_dim,
-                cfg=cfg.maddpg,
-            )
-        except Exception as e:
-            logger.error("Error inicializando MADDPG: %r", e)
-            logger.error(traceback.format_exc())
-            return 1
+        # Inicializar MADDPG (cooperativo o estándar)
+        cooperative = getattr(cfg.env, 'cooperative_reward', True)
+        
+        if cooperative:
+            logger.info("Inicializando CooperativeMADDPG con coordinación...")
+            try:
+                maddpg = CooperativeMADDPG(
+                    n_agents=env.n_agents,
+                    obs_dim=env.obs_dim,
+                    action_dim=env.action_dim,
+                    cfg=cfg.maddpg,
+                    coordination_dim=32,
+                    use_attention=True,
+                    use_mean_field=True,
+                )
+                logger.info("CooperativeMADDPG con coordinación Mean-Field + Attention")
+            except Exception as e:
+                logger.error("Error inicializando CooperativeMADDPG: %r", e)
+                logger.error(traceback.format_exc())
+                return 1
+        else:
+            logger.info("Inicializando MADDPG estándar...")
+            try:
+                maddpg = MADDPG(
+                    n_agents=env.n_agents,
+                    obs_dim=env.obs_dim,
+                    action_dim=env.action_dim,
+                    cfg=cfg.maddpg,
+                )
+            except Exception as e:
+                logger.error("Error inicializando MADDPG: %r", e)
+                logger.error(traceback.format_exc())
+                return 1
 
         # Crear directorio de checkpoints
         os.makedirs(cfg.training.save_dir, exist_ok=True)
@@ -234,6 +280,12 @@ def main():
             try:
                 obs = env.reset()
                 consecutive_errors = 0  # Reset contador de errores
+                
+                # === RESET RUIDO OU AL INICIO DE CADA EPISODIO ===
+                # Crítico: el ruido OU tiene estado que debe resetearse
+                if hasattr(maddpg, 'reset_noise'):
+                    maddpg.reset_noise()
+                    
             except Exception as e:
                 consecutive_errors += 1
                 logger.warning("Error en reset (intento %d/%d): %r", 
@@ -379,6 +431,31 @@ def main():
                     logger.warning("No se pudieron guardar KPIs: %r", exc)
             except Exception as exc:
                 logger.warning("env.evaluate() falló: %r", exc)
+
+        # === GENERACIÓN AUTOMÁTICA DE GRÁFICAS ===
+        logger.info("Generando gráficas con resultados del entrenamiento...")
+        try:
+            from scripts.update_all_graphs import main as update_graphs
+            update_graphs()
+            logger.info("✓ Gráficas actualizadas en static/images/ y reports/")
+        except Exception as exc:
+            logger.warning("No se pudieron generar gráficas: %r", exc)
+            # Intentar ejecutar como script externo
+            try:
+                import subprocess
+                result = subprocess.run(
+                    [sys.executable, "scripts/update_all_graphs.py"],
+                    cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                    capture_output=True,
+                    text=True,
+                    timeout=120
+                )
+                if result.returncode == 0:
+                    logger.info("✓ Gráficas generadas (subprocess)")
+                else:
+                    logger.warning("Error generando gráficas: %s", result.stderr)
+            except Exception as e2:
+                logger.warning("Falló generación de gráficas: %r", e2)
 
         return 0
 

@@ -12,7 +12,13 @@ class EnvConfig:
     simulation_start_time_step: Optional[int] = None
     simulation_end_time_step: Optional[int] = None
     reward_function: Optional[str] = None
-    reward_weights: Optional[Dict[str, Any]] = None
+    # === 4 MÉTRICAS PRINCIPALES DE CITYLEARN V2 ===
+    # Cost, Carbon Emissions, Ramping, Load Factor
+    use_4_metrics_reward: bool = True
+    reward_weights: Optional[Dict[str, float]] = None
+    # === TEAM REWARD PARA CTDE COOPERATIVO ===
+    # Cuando es True, todos los agentes reciben la MISMA recompensa global
+    cooperative_reward: bool = True
 
 
 @dataclass
@@ -41,10 +47,12 @@ class TrainingConfig:
     seed: int = 0
     save_dir: str = "models/citylearn_maddpg"
     # Validación/early stopping
-    val_every: int = 5
+    val_every: Optional[int] = 5
     val_episodes: int = 2
     early_stopping_patience: int = 3
     early_stopping_min_delta: float = 0.0
+    # Checkpoint periódico
+    save_every: Optional[int] = 10
 
 
 @dataclass

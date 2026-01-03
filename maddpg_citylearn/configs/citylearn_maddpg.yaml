@@ -1,9 +1,10 @@
-# Configuración MADDPG para CityLearn v2.5 - Comparación con MARLISA
-# =================================================================
-# Este archivo configura MADDPG para ser comparable con MARLISA:
-# - Mismo schema: citylearn_challenge_2022_phase_all_plus_evs
-# - Misma reward function: Electric_Vehicles_Reward_Function (nativa)
-# - Mismos KPIs de evaluación
+# Configuración MADDPG para CityLearn v2.5 - CTDE COOPERATIVO
+# ============================================================================
+# PARADIGMA CTDE (Centralized Training, Decentralized Execution):
+# ✓ Entrenamiento CENTRALIZADO: Critic ve estado global de 17 edificios
+# ✓ Ejecución DESCENTRALIZADA: Cada actor usa solo su observación local
+# ✓ TEAM REWARD: Todos los agentes reciben la MISMA recompensa global
+# ✓ COOPERATIVO: Los agentes aprenden a cooperar, no competir
 # - 17 agentes (edificios), 8760 steps/episodio
 
 env:
@@ -11,34 +12,38 @@ env:
   schema: "citylearn_challenge_2022_phase_all_plus_evs"
   simulation_start_time_step: null  # Usar todo el año
   simulation_end_time_step: null    # 8760 steps
-  # Usar reward function NATIVA de CityLearn (Electric_Vehicles_Reward_Function)
-  # Esto asegura comparación justa con MARLISA que también la usa
-  reward_function: null  # null = usa la del schema (EV_Reward_Function)
-  # NO usar reward_weights custom para comparación justa
-  reward_weights: null
+  
+  # === RECOMPENSA COOPERATIVA (TEAM REWARD) ===
+  # CRÍTICO para CTDE: Todos reciben la MISMA recompensa global
+  # Esto incentiva cooperación entre edificios del distrito
+  use_4_metrics_reward: true
+  cooperative_reward: true          # TEAM REWARD para CTDE
+  reward_weights:
+    cost: 0.25                      # Costo TOTAL del distrito
+    carbon: 0.25                    # Emisiones TOTALES del distrito  
+    ramping: 0.20                   # Estabilidad GLOBAL de red
+    load_factor: 0.15               # Uniformidad del distrito
+    electricity_consumption: 0.15   # Consumo TOTAL del distrito
 
 maddpg:
-  # === HIPERPARÁMETROS - Comparación con MARLISA ===
-  # MARLISA usa: gamma=0.99, tau=0.005, lr=0.0003, hidden=[400,300], batch=100
-  gamma: 0.99               # IGUAL que MARLISA
-  tau: 0.005                # IGUAL que MARLISA
-  actor_lr: 0.0003          # IGUAL que MARLISA
-  critic_lr: 0.0003         # IGUAL que MARLISA (lr único)
-  hidden_dim: 400           # Similar a MARLISA [400, 300] (primera capa)
-  # === BUFFER Y BATCH - Optimizado para GPU ===
-  # MARLISA usa: batch=100, buffer=100k
-  # Nosotros aumentamos para mejor uso de GPU
-  buffer_size: 100000       # IGUAL que MARLISA para comparación justa
-  batch_size: 256           # Mayor que MARLISA para mejor GPU (100 -> 256)
-  device: "cuda"            # GPU RTX 4060 Laptop
-  # === EXPLORACIÓN ===
-  exploration_initial_std: 0.3    # Exploración inicial
-  exploration_final_std: 0.05     # Exploración mínima
-  exploration_decay_steps: 175000 # ~20 episodios
+  # === HIPERPARÁMETROS PARA CTDE COOPERATIVO ===
+  gamma: 0.99               # Descuento estándar
+  tau: 0.005                # Soft update estándar
+  actor_lr: 0.0001          # Actor learning rate
+  critic_lr: 0.0003         # Critic (centralizado) learning rate
+  hidden_dim: 256           # Capacidad moderada
+  # === BUFFER Y BATCH ===
+  buffer_size: 100000       # Replay buffer compartido
+  batch_size: 256           # Batch size
+  device: "cuda"            # GPU RTX 4060
+  # === EXPLORACIÓN OU ===
+  exploration_initial_std: 0.3
+  exploration_final_std: 0.05
+  exploration_decay_steps: 400000 # ~45 episodios decay
   # === SCHEDULING DE UPDATES ===
-  update_after: 8760        # 1 episodio completo antes de entrenar
-  update_every: 50          # Updates moderados (similar a SAC)
-  updates_per_step: 1       # 1 update por ciclo (como MARLISA)
+  update_after: 8760        # 1 episodio antes de entrenar
+  update_every: 50          # Menos frecuente para estabilidad
+  updates_per_step: 1       # 1 update estándar
 
 training:
   # === ENTRENAMIENTO COMPARABLE CON MARLISA ===
@@ -48,7 +53,7 @@ training:
   seed: 42                  # Reproducibilidad
   save_dir: "models/citylearn_maddpg"
   # === VALIDACIÓN Y EARLY STOPPING ===
-  val_every: 5              # Validar cada 5 episodios
+  val_every: null           # Desactivar validación (problema de red)
   val_episodes: 1           # 1 episodio de validación
   early_stopping_patience: 10    # Paciencia amplia
   early_stopping_min_delta: 50.0  # Delta razonable

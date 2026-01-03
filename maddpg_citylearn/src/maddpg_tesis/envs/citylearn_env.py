@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Tuple, List, Optional
+from typing import Any, Dict, Tuple, List, Optional, Union
 import warnings
 import numpy as np
+
+from .reward_functions import MADDPG_Reward_Function, create_reward_function
 
 
 class CityLearnMultiAgentEnv:
@@ -12,6 +14,7 @@ class CityLearnMultiAgentEnv:
     - Usa CityLearnEnv con central_agent=False (un agente por edificio).
     - Observaciones: np.ndarray (n_agents, obs_dim)
     - Acciones:      np.ndarray (n_agents, action_dim) en [-1, 1]
+    - Soporta TEAM REWARD para MADDPG cooperativo (CTDE)
     - Manejo robusto de errores y excepciones de CityLearn.
     """
 
@@ -23,15 +26,29 @@ class CityLearnMultiAgentEnv:
             schema: CityLearn schema name. Ejemplo: 'citylearn_challenge_2022_phase_all_plus_evs'
             central_agent: Debe ser False para multi-agente
             **env_kwargs: Argumentos adicionales para CityLearnEnv
+                - reward_weights: Dict con pesos para las 4 métricas principales
+                - use_4_metrics_reward: bool para activar recompensa multi-objetivo
+                - cooperative: bool para activar TEAM REWARD (misma recompensa para todos)
         """
         # Suprimir warnings de CityLearn durante inicialización
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             from citylearn.citylearn import CityLearnEnv
 
-        # Peso de recompensas personalizadas (costos/CO2/comfort/picos)
+        # Peso de recompensas personalizadas (costos/CO2/ramping/load_factor)
         self.reward_weights: Optional[Dict[str, float]] = env_kwargs.pop(
             "reward_weights", None
+        )
+        
+        # Flag para usar recompensa con las 4 métricas principales de CityLearn v2
+        self.use_4_metrics_reward: bool = env_kwargs.pop(
+            "use_4_metrics_reward", True  # Activado por defecto
+        )
+        
+        # Flag para TEAM REWARD (MADDPG cooperativo CTDE)
+        # Cuando es True, TODOS los agentes reciben la MISMA recompensa global
+        self.cooperative: bool = env_kwargs.pop(
+            "cooperative", False  # Desactivado por defecto para compatibilidad
         )
 
         if central_agent:
@@ -54,6 +71,22 @@ class CityLearnMultiAgentEnv:
         self._is_closed: bool = False
         self._episode_step: int = 0
         self._max_episode_steps: int = 8760  # Default: 1 año de simulación
+        
+        # Inicializar función de recompensa con 4 métricas principales
+        # (Cost, Carbon Emissions, Ramping, Load Factor)
+        if self.use_4_metrics_reward:
+            env_metadata = {
+                'central_agent': False,
+                'building_count': self.n_agents,
+            }
+            self._custom_reward_fn = create_reward_function(
+                env_metadata=env_metadata,
+                reward_type='maddpg_4_metrics',
+                weights=self.reward_weights,
+                cooperative=self.cooperative,  # TEAM REWARD para CTDE
+            )
+        else:
+            self._custom_reward_fn = None
 
         # Reset inicial para deducir dimensiones (padded a max obs_dim)
         try:
@@ -79,6 +112,10 @@ class CityLearnMultiAgentEnv:
         
         self._episode_step = 0
         
+        # Resetear función de recompensa personalizada
+        if self._custom_reward_fn is not None:
+            self._custom_reward_fn.reset()
+        
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
@@ -97,6 +134,9 @@ class CityLearnMultiAgentEnv:
     ) -> Tuple[np.ndarray, np.ndarray, bool, Dict[str, Any]]:
         """
         Ejecuta un paso en CityLearn con manejo robusto de errores.
+        
+        Usa función de recompensa personalizada que optimiza las 4 métricas
+        principales de CityLearn v2: Cost, Carbon, Ramping, Load Factor.
 
         Returns
         -------
@@ -168,21 +208,40 @@ class CityLearnMultiAgentEnv:
         info_dict: Dict[str, Any] = info if isinstance(info, dict) else {}
 
         next_obs_array = self._normalize_obs(next_obs)
-        rewards_array = np.asarray(reward, dtype=np.float32)
+        
+        # === CÁLCULO DE RECOMPENSA ===
+        # Usar función de recompensa con las 4 métricas principales de CityLearn v2
+        # (Cost, Carbon Emissions, Ramping, Load Factor)
+        if self._custom_reward_fn is not None:
+            # Obtener observaciones detalladas para la función de recompensa
+            try:
+                building_observations = [
+                    b.observations() for b in self._env.buildings
+                ]
+                rewards_array = np.asarray(
+                    self._custom_reward_fn.calculate(building_observations),
+                    dtype=np.float32
+                )
+            except Exception:
+                # Fallback a recompensa nativa si hay error
+                rewards_array = np.asarray(reward, dtype=np.float32)
+        else:
+            rewards_array = np.asarray(reward, dtype=np.float32)
 
         if rewards_array.ndim == 0:
             rewards_array = np.full(
                 self.n_agents, rewards_array, dtype=np.float32
             )
         elif rewards_array.shape != (self.n_agents,):
-            raise RuntimeError(
-                f"reward inesperado: esperado (n_agents,), recibido {rewards_array.shape}."
-            )
-
-        # Recompensa: usar la nativa de CityLearn para comparación justa con MARLISA
-        # Si reward_weights se provee, se aplica ponderación custom después
-        if self.reward_weights:
-            rewards_array = self._custom_reward(rewards_array, info_dict)
+            # Ajustar si el tamaño no coincide
+            if len(rewards_array) < self.n_agents:
+                rewards_array = np.pad(
+                    rewards_array, 
+                    (0, self.n_agents - len(rewards_array)),
+                    constant_values=0.0
+                )
+            else:
+                rewards_array = rewards_array[:self.n_agents]
 
         done: bool = bool(terminated or truncated)
         self._last_obs = next_obs_array

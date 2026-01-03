@@ -9,7 +9,7 @@ import json
 import warnings
 import sys
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 import numpy as np
 
@@ -142,7 +142,7 @@ def run_no_control_baseline(episodes: int = 1) -> Dict[str, Any]:
     }
 
 
-def run_rbc_baseline(episodes: int = 1) -> Dict[str, Any]:
+def run_rbc_baseline(episodes: int = 1) -> Optional[Dict[str, Any]]:
     """Ejecuta Rule-Based Controller."""
     print("\n" + "="*60)
     print("Evaluando: RBC (Rule-Based Control)")
@@ -165,7 +165,7 @@ def run_rbc_baseline(episodes: int = 1) -> Dict[str, Any]:
     return result
 
 
-def run_marlisa(episodes: int = 1) -> Dict[str, Any]:
+def run_marlisa(episodes: int = 1) -> Optional[Dict[str, Any]]:
     """Ejecuta MARLISA (el benchmark principal)."""
     print("\n" + "="*60)
     print("Evaluando: MARLISA (Multi-Agent RL + Information Sharing)")
@@ -186,7 +186,7 @@ def run_marlisa(episodes: int = 1) -> Dict[str, Any]:
     return result
 
 
-def run_sac_independent(episodes: int = 1) -> Dict[str, Any]:
+def run_sac_independent(episodes: int = 1) -> Optional[Dict[str, Any]]:
     """Ejecuta SAC independiente (sin coordinación)."""
     print("\n" + "="*60)
     print("Evaluando: SAC Independiente")
