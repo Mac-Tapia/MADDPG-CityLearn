@@ -7,11 +7,13 @@ Compara:
 """
 import sys
 import os
+
+import numpy as np
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from maddpg_tesis.core.config import load_config
-from maddpg_tesis.envs import CityLearnMultiAgentEnv
-import numpy as np
+from maddpg_tesis.core.config import load_config  # noqa: E402
+from maddpg_tesis.envs import CityLearnMultiAgentEnv  # noqa: E402
 
 print("=" * 80)
 print("VERIFICACION: MADDPG vs MARLISA - COMPARACION JUSTA")

@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 # Carpeta raíz del proyecto
@@ -44,7 +43,9 @@ FILES = {
     ROOT / "src" / "maddpg_tesis" / "models" / "loader.py": "# TODO: pegar aquí el código de loader.py\n",
 
     # api
-    ROOT / "src" / "maddpg_tesis" / "api" / "__init__.py": '"""API REST (FastAPI) para inferencia MADDPG CityLearn.""\"\n',
+    ROOT / "src" / "maddpg_tesis" / "api" / "__init__.py": (
+        '"""API REST (FastAPI) para inferencia MADDPG CityLearn.""\"\n'
+    ),
     ROOT / "src" / "maddpg_tesis" / "api" / "schemas.py": "# TODO: pegar aquí el código de schemas.py\n",
     ROOT / "src" / "maddpg_tesis" / "api" / "deps.py": "# TODO: pegar aquí el código de deps.py\n",
     ROOT / "src" / "maddpg_tesis" / "api" / "main.py": "# TODO: pegar aquí el código de main.py\n",
@@ -53,8 +54,13 @@ FILES = {
     ROOT / "configs" / "citylearn_maddpg.yaml": "# TODO: pegar aquí la config YAML.\n",
 
     # scripts
-    ROOT / "scripts" / "train_citylearn.py": "# TODO: pegar aquí el código de train_citylearn.py\n",
-    ROOT / "scripts" / "run_api_local.sh": "#!/usr/bin/env bash\n# TODO: pegar aquí el contenido final de run_api_local.sh\n",
+    ROOT / "scripts" / "train_citylearn.py": (
+        "# TODO: pegar aquí el código de train_citylearn.py\n"
+    ),
+    ROOT / "scripts" / "run_api_local.sh": (
+        "#!/usr/bin/env bash\n"
+        "# TODO: pegar aquí el contenido final de run_api_local.sh\n"
+    ),
 
     # raíz
     ROOT / "requirements.txt": "# TODO: pegar aquí las dependencias (requirements.txt)\n",

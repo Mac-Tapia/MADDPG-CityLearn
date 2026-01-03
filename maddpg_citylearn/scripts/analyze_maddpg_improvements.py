@@ -7,8 +7,10 @@ y propone mejoras específicas para superar el rendimiento de MARLISA.
 """
 import os
 import json
-import torch
 import numpy as np
+import yaml
+import matplotlib.pyplot as plt
+import shutil
 
 print("=" * 80)
 print("🔍 ANÁLISIS: POR QUÉ MADDPG NO SUPERA A MARLISA (AÚN)")
@@ -26,7 +28,6 @@ with open('reports/continue_training/training_history.json', 'r') as f:
 district_kpis = {k['cost_function']: k['value'] for k in kpis if k.get('level') == 'district'}
 
 # Cargar configuración actual
-import yaml
 with open('configs/citylearn_maddpg.yaml', 'r') as f:
     config = yaml.safe_load(f)
 
@@ -53,14 +54,13 @@ problemas = """
 1. INSUFICIENTE ENTRENAMIENTO
    ─────────────────────────────────────────────────────────────────────────
    • MADDPG actual: 15 episodios
-   • MARLISA referencia: 50 episodios  
+   • MARLISA referencia: 50 episodios
    • El agente NO ha convergido completamente
    • La curva de aprendizaje aún está en fase de mejora
 
 2. HIPERPARÁMETROS NO OPTIMIZADOS
    ─────────────────────────────────────────────────────────────────────────
    Configuración actual vs recomendada:
-   
    Parámetro          | Actual    | Recomendado | Impacto
    ───────────────────|───────────|─────────────|──────────────────────
    Learning rate      | 1e-3      | 3e-4        | Convergencia más estable
@@ -139,7 +139,7 @@ RESULTADO ESPERADO DESPUÉS DE MEJORAS:
 Métrica              | Actual  | Objetivo | MARLISA | Meta
 ─────────────────────|─────────|──────────|─────────|────────────────
 Costo total          | 0.983   | < 0.90   | 0.92    | SUPERAR
-Emisiones CO2        | 0.972   | < 0.92   | 0.94    | SUPERAR  
+Emisiones CO2        | 0.972   | < 0.92   | 0.94    | SUPERAR
 Peak shaving         | 0.871   | < 0.85   | 0.88    | YA SUPERA ✓
 Consumo eléctrico    | 0.978   | < 0.91   | 0.93    | SUPERAR
 """
@@ -187,12 +187,12 @@ config_mejorada = {
         'peak_weight': 0.25,        # Mantener peak
         'comfort_weight': 0.10,     # Reducir comfort
         'grid_weight': 0.10,        # Nuevo: penalizar importación de red
-        
+
         # Bonificaciones adicionales
         'solar_utilization_bonus': 0.05,   # Bonus por usar solar
         'ev_offpeak_bonus': 0.05,          # Bonus por carga en valle
         'coordination_bonus': 0.02,         # Bonus por coordinación
-        
+
         # Penalizaciones
         'action_penalty': 0.01,            # Penalizar acciones extremas
         'peak_hour_penalty': 0.03,         # Penalizar consumo en pico
@@ -221,10 +221,8 @@ print("\n" + "=" * 80)
 print("📈 PROYECCIÓN DE MEJORA")
 print("=" * 80)
 
-import matplotlib.pyplot as plt
-
 fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-fig.suptitle('Sistema Multi-Agente MADDPG: Plan de Mejora para Superar MARLISA', 
+fig.suptitle('Sistema Multi-Agente MADDPG: Plan de Mejora para Superar MARLISA',
              fontsize=14, fontweight='bold')
 
 # 1. Proyección de convergencia
@@ -241,7 +239,7 @@ marlisa_ref = np.ones_like(episodios) * 0.92
 ax.plot(episodios, maddpg_actual, '--', color='#e74c3c', linewidth=2, label='MADDPG (config actual)')
 ax.plot(episodios, maddpg_mejorado, '-', color='#27ae60', linewidth=2.5, label='MADDPG (mejorado)')
 ax.axhline(y=0.92, color='#3498db', linestyle=':', linewidth=2, label='MARLISA target')
-ax.fill_between(episodios, maddpg_mejorado, 0.92, where=maddpg_mejorado < 0.92, 
+ax.fill_between(episodios, maddpg_mejorado, 0.92, where=maddpg_mejorado < 0.92,
                 alpha=0.3, color='#27ae60', label='Zona de superación')
 
 ax.set_xlabel('Episodios de Entrenamiento', fontsize=11)
@@ -332,7 +330,7 @@ roadmap = """
 
 ax.text(0.5, 0.5, roadmap, transform=ax.transAxes, fontsize=10,
         verticalalignment='center', horizontalalignment='center',
-        fontfamily='monospace', bbox=dict(boxstyle='round', facecolor='lightyellow', 
+        fontfamily='monospace', bbox=dict(boxstyle='round', facecolor='lightyellow',
                                           edgecolor='#f39c12', linewidth=2))
 
 plt.tight_layout()
@@ -341,7 +339,6 @@ plt.close()
 print("✅ Gráfica de plan de mejora guardada")
 
 # Copiar a static
-import shutil
 shutil.copy2('reports/comparacion_flexibilidad/plan_mejora_maddpg.png', 'static/images/')
 print("   Copiado a: static/images/plan_mejora_maddpg.png")
 
