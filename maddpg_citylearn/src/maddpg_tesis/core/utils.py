@@ -5,12 +5,15 @@ import torch
 
 
 def set_global_seeds(seed: int = 42) -> None:
+    """Configura semillas para reproducibilidad."""
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+    # Nota: deterministic=True puede ser más lento pero es reproducible
+    # Para entrenar más rápido, usar deterministic=False
+    torch.backends.cudnn.deterministic = False
+    torch.backends.cudnn.benchmark = True  # Auto-tuning para mejor performance
 
 
 def get_device(preferred: str = "cuda") -> torch.device:

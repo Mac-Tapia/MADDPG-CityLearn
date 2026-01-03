@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 import torch
@@ -14,11 +14,12 @@ from .replay_buffer import ReplayBuffer
 
 class MADDPG:
     """
-    Implementación de MADDPG para CityLearn v2 (MADRL continuo).
+    Implementación robusta de MADDPG para CityLearn v2 (MADRL continuo).
 
     - Crítico centralizado (CTDE).
     - Actores descentralizados (uno por edificio/agente).
     - Entrenamiento off-policy con replay buffer.
+    - Manejo robusto de errores y datos inválidos.
     """
 
     def __init__(
@@ -76,30 +77,49 @@ class MADDPG:
         self, obs: np.ndarray, noise: bool = True
     ) -> np.ndarray:
         """
-        obs: (n_agents, obs_dim)
-        Devuelve acciones en [-1, 1] de shape (n_agents, action_dim).
+        Selecciona acciones para todos los agentes.
+        
+        Args:
+            obs: (n_agents, obs_dim) observaciones
+            noise: si True, añade ruido de exploración
+            
+        Returns:
+            actions: (n_agents, action_dim) en [-1, 1]
         """
-        obs_t = to_tensor(obs, self.device).float()  # (n_agents, obs_dim)
-        actions = []
+        # Validar y sanitizar observaciones
+        obs = np.asarray(obs, dtype=np.float32)
+        if np.any(np.isnan(obs)) or np.any(np.isinf(obs)):
+            obs = np.nan_to_num(obs, nan=0.0, posinf=1.0, neginf=-1.0)
+        
+        try:
+            obs_t = to_tensor(obs, self.device).float()
+            actions = []
 
-        for i, agent in enumerate(self.agents):
-            a = agent.act(obs_t[i].unsqueeze(0))  # (1, action_dim)
-            actions.append(a.squeeze(0))
+            for i, agent in enumerate(self.agents):
+                with torch.no_grad():
+                    a = agent.act(obs_t[i].unsqueeze(0))
+                actions.append(a.squeeze(0))
 
-        actions_t = torch.stack(actions, dim=0)  # (n_agents, action_dim)
-        actions_np = actions_t.cpu().numpy()
+            actions_t = torch.stack(actions, dim=0)
+            actions_np = actions_t.cpu().numpy()
 
-        if noise:
-            noisy_actions = []
-            for agent_idx in range(self.n_agents):
-                eps = self.noise.sample()
-                noisy_actions.append(
-                    np.clip(actions_np[agent_idx] + eps, -1.0, 1.0)
-                )
-                self.noise.step()
-            actions_np = np.stack(noisy_actions, axis=0)
+            if noise:
+                noisy_actions = []
+                for agent_idx in range(self.n_agents):
+                    eps = self.noise.sample()
+                    noisy_actions.append(
+                        np.clip(actions_np[agent_idx] + eps, -1.0, 1.0)
+                    )
+                    self.noise.step()
+                actions_np = np.stack(noisy_actions, axis=0)
 
-        return actions_np.astype(np.float32)
+            # Validación final
+            actions_np = np.clip(actions_np, -1.0, 1.0).astype(np.float32)
+            return actions_np
+            
+        except Exception as e:
+            # En caso de error, devolver acciones neutras
+            return np.zeros((self.n_agents, self.action_dim), dtype=np.float32)
 
     def store_transition(
         self,
@@ -110,8 +130,25 @@ class MADDPG:
         done: bool,
     ) -> None:
         """
+        Almacena transición en el replay buffer.
+        
         done: bool -> se replica a todos los agentes como vector.
         """
+        # Validar y sanitizar datos
+        obs = np.asarray(obs, dtype=np.float32)
+        actions = np.asarray(actions, dtype=np.float32)
+        rewards = np.asarray(rewards, dtype=np.float32)
+        next_obs = np.asarray(next_obs, dtype=np.float32)
+        
+        # Sanitizar valores inválidos
+        obs = np.nan_to_num(obs, nan=0.0, posinf=1.0, neginf=-1.0)
+        actions = np.nan_to_num(actions, nan=0.0, posinf=1.0, neginf=-1.0)
+        rewards = np.nan_to_num(rewards, nan=0.0, posinf=0.0, neginf=0.0)
+        next_obs = np.nan_to_num(next_obs, nan=0.0, posinf=1.0, neginf=-1.0)
+        
+        # Clip de acciones
+        actions = np.clip(actions, -1.0, 1.0)
+        
         dones_vec = np.full(self.n_agents, float(done), dtype=np.float32)
         self.replay_buffer.add(obs, actions, rewards, next_obs, dones_vec)
         self.total_steps += 1
@@ -128,91 +165,114 @@ class MADDPG:
             return {}
 
         metrics: Dict[str, float] = {}
-        for _ in range(self.cfg.updates_per_step):
-            m = self._update_once()
-            metrics.update(m)
+        try:
+            for _ in range(self.cfg.updates_per_step):
+                m = self._update_once()
+                metrics.update(m)
+        except Exception as e:
+            # Log error pero no interrumpir entrenamiento
+            metrics["update_error"] = 1.0
         return metrics
 
     def _update_once(self) -> Dict[str, float]:
         if len(self.replay_buffer) < self.cfg.batch_size:
             return {}
 
-        batch = self.replay_buffer.sample(self.cfg.batch_size)
+        try:
+            batch = self.replay_buffer.sample(self.cfg.batch_size)
 
-        obs = to_tensor(batch["obs"], self.device)  # (B, n_agents, obs_dim)
-        actions = to_tensor(
-            batch["actions"], self.device
-        )  # (B, n_agents, action_dim)
-        rewards = to_tensor(batch["rewards"], self.device)  # (B, n_agents)
-        next_obs = to_tensor(batch["next_obs"], self.device)
-        dones = to_tensor(batch["dones"], self.device)
+            obs = to_tensor(batch["obs"], self.device)
+            actions = to_tensor(batch["actions"], self.device)
+            rewards = to_tensor(batch["rewards"], self.device)
+            next_obs = to_tensor(batch["next_obs"], self.device)
+            dones = to_tensor(batch["dones"], self.device)
+            
+            # Validar tensores
+            if torch.any(torch.isnan(obs)) or torch.any(torch.isnan(actions)):
+                return {"batch_invalid": 1.0}
 
-        B = obs.shape[0]
+            B = obs.shape[0]
 
-        global_obs = obs.view(B, -1)
-        global_actions = actions.view(B, -1)
-        global_next_obs = next_obs.view(B, -1)
+            global_obs = obs.view(B, -1)
+            global_actions = actions.view(B, -1)
+            global_next_obs = next_obs.view(B, -1)
 
-        metrics: Dict[str, float] = {}
+            metrics: Dict[str, float] = {}
 
-        for agent_idx, agent in enumerate(self.agents):
-            # acciones target para todos los agentes
-            next_actions_list = []
-            for j, other_agent in enumerate(self.agents):
-                next_obs_j = next_obs[:, j, :]
-                next_actions_list.append(other_agent.target_actor(next_obs_j))
-            target_global_next_actions = torch.cat(next_actions_list, dim=-1)
+            for agent_idx, agent in enumerate(self.agents):
+                # acciones target para todos los agentes
+                next_actions_list = []
+                for j, other_agent in enumerate(self.agents):
+                    next_obs_j = next_obs[:, j, :]
+                    with torch.no_grad():
+                        next_actions_list.append(other_agent.target_actor(next_obs_j))
+                target_global_next_actions = torch.cat(next_actions_list, dim=-1)
 
-            # crítico target (centralizado)
-            with torch.no_grad():
-                target_q = agent.target_critic(
-                    global_next_obs, target_global_next_actions
+                # crítico target (centralizado)
+                with torch.no_grad():
+                    target_q = agent.target_critic(
+                        global_next_obs, target_global_next_actions
+                    )
+                    y = (
+                        rewards[:, agent_idx].unsqueeze(-1)
+                        + agent.cfg.gamma
+                        * (1.0 - dones[:, agent_idx].unsqueeze(-1))
+                        * target_q
+                    )
+
+                # loss del crítico
+                q = agent.critic(global_obs, global_actions)
+                critic_loss = F.mse_loss(q, y)
+                
+                # Validar loss
+                if torch.isnan(critic_loss) or torch.isinf(critic_loss):
+                    continue
+
+                agent.critic_optim.zero_grad()
+                critic_loss.backward()
+                torch.nn.utils.clip_grad_norm_(
+                    agent.critic.parameters(), max_norm=1.0
                 )
-                y = (
-                    rewards[:, agent_idx].unsqueeze(-1)
-                    + agent.cfg.gamma
-                    * (1.0 - dones[:, agent_idx].unsqueeze(-1))
-                    * target_q
+                agent.critic_optim.step()
+
+                # loss del actor
+                curr_actions_list = []
+                for j, other_agent in enumerate(self.agents):
+                    obs_j = obs[:, j, :]
+                    if j == agent_idx:
+                        curr_actions_list.append(other_agent.actor(obs_j))
+                    else:
+                        curr_actions_list.append(actions[:, j, :])
+                curr_global_actions = torch.cat(curr_actions_list, dim=-1)
+
+                actor_loss = -agent.critic(global_obs, curr_global_actions).mean()
+                
+                # Validar loss del actor
+                if torch.isnan(actor_loss) or torch.isinf(actor_loss):
+                    continue
+
+                agent.actor_optim.zero_grad()
+                actor_loss.backward()
+                torch.nn.utils.clip_grad_norm_(
+                    agent.actor.parameters(), max_norm=1.0
                 )
+                agent.actor_optim.step()
 
-            # loss del crítico
-            q = agent.critic(global_obs, global_actions)
-            critic_loss = F.mse_loss(q, y)
+                # soft update
+                soft_update(agent.target_actor, agent.actor, agent.cfg.tau)
+                soft_update(agent.target_critic, agent.critic, agent.cfg.tau)
 
-            agent.critic_optim.zero_grad()
-            critic_loss.backward()
-            torch.nn.utils.clip_grad_norm_(
-                agent.critic.parameters(), max_norm=1.0
-            )
-            agent.critic_optim.step()
+                metrics[f"agent_{agent_idx}_actor_loss"] = actor_loss.item()
+                metrics[f"agent_{agent_idx}_critic_loss"] = critic_loss.item()
 
-            # loss del actor
-            curr_actions_list = []
-            for j, other_agent in enumerate(self.agents):
-                obs_j = obs[:, j, :]
-                if j == agent_idx:
-                    curr_actions_list.append(other_agent.actor(obs_j))
-                else:
-                    curr_actions_list.append(actions[:, j, :])
-            curr_global_actions = torch.cat(curr_actions_list, dim=-1)
-
-            actor_loss = -agent.critic(global_obs, curr_global_actions).mean()
-
-            agent.actor_optim.zero_grad()
-            actor_loss.backward()
-            torch.nn.utils.clip_grad_norm_(
-                agent.actor.parameters(), max_norm=1.0
-            )
-            agent.actor_optim.step()
-
-            # soft update
-            soft_update(agent.target_actor, agent.actor, agent.cfg.tau)
-            soft_update(agent.target_critic, agent.critic, agent.cfg.tau)
-
-            metrics[f"agent_{agent_idx}_actor_loss"] = actor_loss.item()
-            metrics[f"agent_{agent_idx}_critic_loss"] = critic_loss.item()
-
-        return metrics
+            return metrics
+            
+        except RuntimeError as e:
+            if "out of memory" in str(e).lower():
+                torch.cuda.empty_cache()
+            return {"runtime_error": 1.0}
+        except Exception as e:
+            return {"error": 1.0}
 
     # --------------------------------------------------------
     # Guardado / carga

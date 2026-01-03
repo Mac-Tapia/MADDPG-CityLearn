@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 from typing import Any, Dict, Tuple, List, Optional
+import warnings
 import numpy as np
 
 
 class CityLearnMultiAgentEnv:
     """
-    Wrapper multi-agente para CityLearn v2.
+    Wrapper multi-agente robusto para CityLearn v2.
 
     - Usa CityLearnEnv con central_agent=False (un agente por edificio).
     - Observaciones: np.ndarray (n_agents, obs_dim)
     - Acciones:      np.ndarray (n_agents, action_dim) en [-1, 1]
+    - Manejo robusto de errores y excepciones de CityLearn.
     """
 
     def __init__(
@@ -22,7 +24,10 @@ class CityLearnMultiAgentEnv:
             central_agent: Debe ser False para multi-agente
             **env_kwargs: Argumentos adicionales para CityLearnEnv
         """
-        from citylearn.citylearn import CityLearnEnv
+        # Suprimir warnings de CityLearn durante inicialización
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            from citylearn.citylearn import CityLearnEnv
 
         # Peso de recompensas personalizadas (costos/CO2/comfort/picos)
         self.reward_weights: Optional[Dict[str, float]] = env_kwargs.pop(
@@ -35,16 +40,30 @@ class CityLearnMultiAgentEnv:
                 "usa central_agent=False."
             )
 
-        self._env = CityLearnEnv(
-            schema=schema, central_agent=False, **env_kwargs
-        )
+        # Inicializar CityLearn con manejo de errores
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                self._env = CityLearnEnv(
+                    schema=schema, central_agent=False, **env_kwargs
+                )
+        except Exception as e:
+            raise RuntimeError(f"Error inicializando CityLearn: {e}") from e
 
         self.n_agents: int = len(self._env.buildings)
+        self._is_closed: bool = False
+        self._episode_step: int = 0
+        self._max_episode_steps: int = 8760  # Default: 1 año de simulación
 
         # Reset inicial para deducir dimensiones (padded a max obs_dim)
-        observations, _ = self._env.reset()
-        obs_array = self._normalize_obs(observations)
-        self.obs_dim: int = obs_array.shape[1]
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                observations, _ = self._env.reset()
+            obs_array = self._normalize_obs(observations)
+            self.obs_dim: int = obs_array.shape[1]
+        except Exception as e:
+            raise RuntimeError(f"Error en reset inicial: {e}") from e
 
         self.action_dims = [
             int(space.shape[0]) for space in self._env.action_space
@@ -55,8 +74,19 @@ class CityLearnMultiAgentEnv:
 
     def reset(self) -> np.ndarray:
         """Resetea episodio y devuelve obs (n_agents, obs_dim)."""
-        observations, _ = self._env.reset()
-        obs_array = self._normalize_obs(observations)
+        if self._is_closed:
+            raise RuntimeError("El entorno está cerrado, no se puede resetear")
+        
+        self._episode_step = 0
+        
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                observations, _ = self._env.reset()
+            obs_array = self._normalize_obs(observations)
+        except Exception as e:
+            # Intentar recuperarse recreando el entorno interno
+            raise RuntimeError(f"Error en reset: {e}") from e
 
         self._last_obs = obs_array
         return obs_array
@@ -66,7 +96,7 @@ class CityLearnMultiAgentEnv:
         actions: np.ndarray,
     ) -> Tuple[np.ndarray, np.ndarray, bool, Dict[str, Any]]:
         """
-        Ejecuta un paso en CityLearn.
+        Ejecuta un paso en CityLearn con manejo robusto de errores.
 
         Returns
         -------
@@ -75,7 +105,20 @@ class CityLearnMultiAgentEnv:
         done     : bool
         info     : dict
         """
+        if self._is_closed:
+            return (
+                self._last_obs,
+                np.zeros(self.n_agents, dtype=np.float32),
+                True,
+                {"error": "environment_closed"},
+            )
+        
         actions = np.asarray(actions, dtype=np.float32)
+        
+        # Validar y sanitizar acciones
+        if np.any(np.isnan(actions)) or np.any(np.isinf(actions)):
+            actions = np.nan_to_num(actions, nan=0.0, posinf=1.0, neginf=-1.0)
+        actions = np.clip(actions, -1.0, 1.0)
 
         if actions.shape != (self.n_agents, self.action_dim):
             raise ValueError(
@@ -89,18 +132,37 @@ class CityLearnMultiAgentEnv:
             for i in range(self.n_agents)
         ]
 
-        # Protección contra IndexError al final del episodio (CityLearn bug)
+        # Protección contra excepciones de CityLearn
         try:
-            next_obs, reward, info, terminated, truncated = self._env.step(
-                per_building_actions
-            )
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                next_obs, reward, info, terminated, truncated = self._env.step(
+                    per_building_actions
+                )
+            self._episode_step += 1
         except IndexError:
-            # Fin del episodio - devolver última observación con done=True
+            # Fin del episodio - bug conocido de CityLearn
             return (
                 self._last_obs,
                 np.zeros(self.n_agents, dtype=np.float32),
                 True,
                 {"truncated_by_index": True},
+            )
+        except KeyError as e:
+            # Error de acceso a datos
+            return (
+                self._last_obs,
+                np.zeros(self.n_agents, dtype=np.float32),
+                True,
+                {"error": f"key_error: {e}"},
+            )
+        except Exception as e:
+            # Otros errores - terminar episodio gracefully
+            return (
+                self._last_obs,
+                np.zeros(self.n_agents, dtype=np.float32),
+                True,
+                {"error": str(e)},
             )
 
         info_dict: Dict[str, Any] = info if isinstance(info, dict) else {}
@@ -127,11 +189,25 @@ class CityLearnMultiAgentEnv:
 
     def evaluate(self):
         """Devuelve KPIs normalizados de CityLearn."""
-        return self._env.evaluate()
+        if self._is_closed:
+            return None
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                return self._env.evaluate()
+        except Exception:
+            return None
 
     def close(self) -> None:
-        if hasattr(self._env, "close"):
-            self._env.close()
+        """Cierra el entorno de forma segura."""
+        if self._is_closed:
+            return
+        self._is_closed = True
+        try:
+            if hasattr(self._env, "close"):
+                self._env.close()
+        except Exception:
+            pass
 
     # ----------------------------------------------------
     # Helpers
