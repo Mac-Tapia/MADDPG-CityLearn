@@ -329,21 +329,21 @@ def print_building_summary():
         (
             "\nEdificios con MEJOR costo que No Control:   "
             f"{buildings_better_cost}/17 "
-            f"({buildings_better_cost/17*100:.0f}%)"
+            f"({buildings_better_cost / 17 * 100:.0f}%)"
         )
     )
     print(
         (
             "Edificios con MENOR CO₂ que No Control:     "
             f"{buildings_better_co2}/17 "
-            f"({buildings_better_co2/17*100:.0f}%)"
+            f"({buildings_better_co2 / 17 * 100:.0f}%)"
         )
     )
     print(
         (
             "Edificios con MENOR pico que No Control:    "
             f"{buildings_better_peak}/17 "
-            f"({buildings_better_peak/17*100:.0f}%)"
+            f"({buildings_better_peak / 17 * 100:.0f}%)"
         )
     )
     print("\n✓ Todos los edificios tienen disconfort = 0 (confort mantenido)")

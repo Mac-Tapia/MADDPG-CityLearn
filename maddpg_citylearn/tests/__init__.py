@@ -1,7 +1,6 @@
 """
 Tests básicos para el proyecto MADDPG CityLearn
 """
-import pytest
 
 
 def test_placeholder():

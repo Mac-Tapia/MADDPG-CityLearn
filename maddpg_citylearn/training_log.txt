@@ -1,0 +1,2 @@
+[2026-01-03 01:23:30] INFO - root: Go here C:\Users\Lenovo Legion\AppData\Local\intelligent-environments-lab\citylearn\Cache\v2.5.0\datasets\citylearn_challenge_2022_phase_all_plus_evs\schema.json 
+[2026-01-03 01:23:34] INFO - train_citylearn: Entorno CityLearn inicializado: n_agents=17, obs_dim=42, action_dim=3

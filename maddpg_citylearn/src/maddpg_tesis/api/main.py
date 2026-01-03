@@ -2,20 +2,18 @@
 MADDPG CityLearn API - Multi-Agent Deep Deterministic Policy Gradient.
 Cumple con Guía 2025 - Secciones 4, 5 y 8 (Despliegue ML/DL y Monitoreo).
 """
-import os
 import time
-import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Dict, Union
 
 import numpy as np
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
-from ..core.logging import get_logger, get_request_logger, setup_logging
+from ..core.logging import get_logger, setup_logging
 from ..core.metrics import (
     PROMETHEUS_AVAILABLE,
     INFERENCE_REQUESTS,
@@ -128,7 +126,7 @@ def readiness() -> Dict[str, Union[str, float]]:
     Readiness check endpoint for readiness probe.
     Returns 200 only if the service is ready to handle traffic.
     """
-    global startup_time
+    # global startup_time  # noqa: F824
 
     if startup_time is None:
         raise HTTPException(status_code=503, detail="Service not started")
@@ -158,7 +156,7 @@ def metrics() -> Response:
 
     Cumple con Guía 2025 - Sección 8.2 Métricas y Observabilidad.
     """
-    global startup_time
+    # global startup_time  # noqa: F824
 
     # Actualizar métricas del sistema
     try:
@@ -190,7 +188,7 @@ def metrics_json() -> Dict[str, Any]:
     Metrics endpoint en formato JSON (alternativo a Prometheus).
     Útil para debugging, dashboards y sistemas que no soportan Prometheus.
     """
-    global startup_time, _metrics_counters
+    # global startup_time, _metrics_counters  # noqa: F824
 
     uptime = time.time() - startup_time if startup_time else 0
 
@@ -266,7 +264,7 @@ def predict(
     Trackea métricas de inferencia (latencia, throughput, errores).
     """
     start_time = time.perf_counter()
-    status = "success"
+    # status = "success"  # noqa: F841
 
     observations = req.observations
     n_agents = len(observations)
@@ -391,7 +389,8 @@ def simulate_step(maddpg=Depends(get_maddpg_model)):
             _simulation_env = CityLearnMultiAgentEnv(
                 schema=cfg.env.schema, central_agent=False
             )
-            obs = _simulation_env.reset()
+            # obs = _simulation_env.reset()  # noqa: F841
+            _simulation_env.reset()
             _simulation_step = 0
             _simulation_episode_reward = 0.0
             logger.info("Entorno de simulación inicializado automáticamente")

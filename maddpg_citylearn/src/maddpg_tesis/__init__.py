@@ -1,5 +1,6 @@
-"""Paquete MADDPG CityLearn (MADRL)."""
 """
+Paquete MADDPG CityLearn (MADRL).
+
 Proyecto de tesis basado en Multi-Agent Deep Reinforcement Learning (MADRL)
 con el algoritmo MADDPG sobre el entorno CityLearn v2.
 """

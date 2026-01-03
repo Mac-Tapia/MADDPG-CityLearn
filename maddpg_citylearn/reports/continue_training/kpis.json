@@ -1,0 +1,1760 @@
+[
+  {
+    "cost_function": "all_time_peak_average",
+    "value": 1.0018571971122339,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 0.9720685291029968,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 0.9827737857215247,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "daily_one_minus_load_factor_average",
+    "value": 1.3626231680311993,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "daily_peak_average",
+    "value": 0.8713157382117246,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 0.9777916485836639,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "monthly_one_minus_load_factor_average",
+    "value": 1.1371361751794256,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "ramping_average",
+    "value": 1.3171642418294451,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 4.567052929134356,
+    "name": "District",
+    "level": "district"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 0.8636363922533192,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 2.4061051265432103,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 0.8257745032566275,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 0.8693802652232105,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_1",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 1.0,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 1.0,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 1.0000000001604494,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 0.9999999996409483,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_2",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 1.0,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 1.0,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 1.000000000447635,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 0.9999999990599143,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_3",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 0.938707542236914,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": -9.34276390431739,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 0.9295288375567637,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 0.9449194165778344,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_4",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 0.8804533178560192,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 1.6069586168900127,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 0.8677672454215476,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 0.8720013242671765,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_5",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 1.0,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 1.0,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 1.00000000027264,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 1.0000000003983145,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_6",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 0.8398666840105693,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 1.7756127394325103,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 0.8236607938721405,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 0.8399980256650086,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_7",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 1.0212159289512064,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 1.0079656858865695,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 1.0213880915649804,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 1.0198139803216104,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_8",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 1.1372424160447092,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 1.1348162302627123,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 1.1561003003724002,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 1.1453604053809558,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_9",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 0.8112214902181478,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": -0.8163076415701491,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 0.7961604366206699,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 0.8022701039561111,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_10",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 1.2871455052890992,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 1.0678799683196671,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 1.280869943515818,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 1.3572608451010746,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_11",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 0.9676245593882948,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 75.26696462165071,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 0.9653863084479091,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 0.9701785724039521,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_12",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 1.0,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 1.0,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 1.0000000000060807,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 1.0000000001370826,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_13",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 1.0,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 1.0,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 1.0000000004295666,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 0.9999999995442295,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_14",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 0.8727810790697679,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": -3.4730151122256987,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 0.8558239795316694,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 0.8834804722479775,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_15",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 1.0015230983789525,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 1.0042579251421035,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 1.001638318160499,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 1.0014266997272265,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_16",
+    "level": "building"
+  },
+  {
+    "cost_function": "electricity_consumption_total",
+    "value": 1.001040012225286,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "zero_net_energy",
+    "value": 1.0014255392697782,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "carbon_emissions_total",
+    "value": 1.0010662351135478,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "cost_total",
+    "value": 1.001064247613295,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_proportion",
+    "value": NaN,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_proportion",
+    "value": NaN,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_proportion",
+    "value": NaN,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_minimum",
+    "value": 0.0,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_maximum",
+    "value": 0.0,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_cold_delta_average",
+    "value": 0.0,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_minimum",
+    "value": 0.0,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_maximum",
+    "value": 0.0,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "discomfort_hot_delta_average",
+    "value": 0.0,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "one_minus_thermal_resilience_proportion",
+    "value": NaN,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "power_outage_normalized_unserved_energy_total",
+    "value": NaN,
+    "name": "Building_17",
+    "level": "building"
+  },
+  {
+    "cost_function": "annual_normalized_unserved_energy_total",
+    "value": 0.0,
+    "name": "Building_17",
+    "level": "building"
+  }
+]

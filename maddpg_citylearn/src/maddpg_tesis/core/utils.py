@@ -9,8 +9,12 @@ def set_global_seeds(seed: int = 42) -> None:
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+    # Optimización CUDA para máximo rendimiento
+    torch.backends.cudnn.deterministic = False
+    torch.backends.cudnn.benchmark = True
+    # Habilitar TF32 para mayor velocidad en RTX 40xx
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
 
 
 def get_device(preferred: str = "cuda") -> torch.device:
