@@ -1,4 +1,7 @@
-# Kustomization overlay para producción
+# Kustomization overlay para producción - MADDPG CTDE v3.0.0-ep50
+# ============================================================================
+# Modelo: MADDPG CTDE Cooperative entrenado 50 episodios (438,000 steps)
+# KPIs: cost_total=1.185, carbon=1.207, daily_peak=1.028, all_time_peak=1.319
 # Uso: kubectl apply -k kubernetes/overlays/production/
 
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -11,14 +14,25 @@ resources:
 # Namespace de producción
 namespace: maddpg-production
 
+# Imagen del modelo entrenado
+images:
+  - name: maddpg-citylearn
+    newTag: v3.0.0-ep50
+
 # Parches para producción
 patches:
-  # Aumentar réplicas y recursos
+  # Aumentar réplicas y recursos para modelo CTDE
   - patch: |-
       apiVersion: apps/v1
       kind: Deployment
       metadata:
         name: maddpg-citylearn
+        annotations:
+          model-version: "v3.0.0-ep50"
+          trained-episodes: "50"
+          kpi-cost-total: "1.185"
+          kpi-carbon-emissions: "1.207"
+          kpi-daily-peak: "1.028"
       spec:
         replicas: 3
         template:
@@ -37,6 +51,12 @@ patches:
                 value: "WARNING"
               - name: ENVIRONMENT
                 value: "production"
+              - name: MODEL_VERSION
+                value: "v3.0.0-ep50"
+              - name: NUM_AGENTS
+                value: "17"
+              - name: TRAINED_EPISODES
+                value: "50"
             affinity:
               podAntiAffinity:
                 requiredDuringSchedulingIgnoredDuringExecution:

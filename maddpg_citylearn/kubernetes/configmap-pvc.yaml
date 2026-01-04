@@ -17,37 +17,69 @@ kind: ConfigMap
 metadata:
   name: maddpg-config
   namespace: default
+  labels:
+    app: maddpg-citylearn
+    component: config
 data:
   citylearn_maddpg.yaml: |
+    # Configuración MADDPG para CityLearn v2.5 - CTDE COOPERATIVO
+    # ============================================================================
+    # PARADIGMA CTDE (Centralized Training, Decentralized Execution):
+    # ✓ Entrenamiento CENTRALIZADO: Critic ve estado global de 17 edificios
+    # ✓ Ejecución DESCENTRALIZADA: Cada actor usa solo su observación local
+    # ✓ TEAM REWARD: Todos los agentes reciben la MISMA recompensa global
+    # ✓ COOPERATIVO: Los agentes aprenden a cooperar, no competir
+    # - 17 agentes (edificios), 8760 steps/episodio
+
     env:
-      # Dataset con vehículos eléctricos para control de flexibilidad energética
+      # Dataset con vehículos eléctricos - IGUAL QUE MARLISA
       schema: "citylearn_challenge_2022_phase_all_plus_evs"
-      simulation_start_time_step: null
-      simulation_end_time_step: null
-      reward_function: null
+      simulation_start_time_step: null  # Usar todo el año
+      simulation_end_time_step: null    # 8760 steps
+      
+      # === RECOMPENSA COOPERATIVA (TEAM REWARD) ===
+      # CRÍTICO para CTDE: Todos reciben la MISMA recompensa global
+      use_4_metrics_reward: true
+      cooperative_reward: true          # TEAM REWARD para CTDE
+      reward_weights:
+        cost: 0.25                      # Costo TOTAL del distrito
+        carbon: 0.25                    # Emisiones TOTALES del distrito  
+        ramping: 0.20                   # Estabilidad GLOBAL de red
+        load_factor: 0.15               # Uniformidad del distrito
+        electricity_consumption: 0.15   # Consumo TOTAL del distrito
 
     maddpg:
-      gamma: 0.99
-      tau: 0.005
-      actor_lr: 0.0005
-      critic_lr: 0.001
-      hidden_dim: 256
-      buffer_size: 200000
-      batch_size: 256
-      device: "cpu"
-      exploration_initial_std: 0.2
+      # === HIPERPARÁMETROS PARA CTDE COOPERATIVO ===
+      gamma: 0.99               # Descuento estándar
+      tau: 0.005                # Soft update estándar
+      actor_lr: 0.0001          # Actor learning rate
+      critic_lr: 0.0003         # Critic (centralizado) learning rate
+      hidden_dim: 256           # Capacidad moderada
+      # === BUFFER Y BATCH ===
+      buffer_size: 100000       # Replay buffer compartido
+      batch_size: 256           # Batch size
+      device: "cpu"             # CPU para inferencia K8s
+      # === EXPLORACIÓN OU ===
+      exploration_initial_std: 0.3
       exploration_final_std: 0.05
-      exploration_decay_steps: 500000
-      update_after: 1000
-      update_every: 50
-      updates_per_step: 1
+      exploration_decay_steps: 400000 # ~45 episodios decay
+      # === SCHEDULING DE UPDATES ===
+      update_after: 8760        # 1 episodio antes de entrenar
+      update_every: 50          # Menos frecuente para estabilidad
+      updates_per_step: 1       # 1 update estándar
 
     training:
-      episodes: 50
-      log_every: 1
-      max_steps_per_episode: null
-      seed: 0
+      # === ENTRENAMIENTO COMPARABLE CON MARLISA ===
+      episodes: 50              # Suficientes para convergencia
+      log_every: 1              # Log cada episodio
+      max_steps_per_episode: null  # 8760 steps completos (1 año)
+      seed: 42                  # Reproducibilidad
       save_dir: "models/citylearn_maddpg"
+      # === VALIDACIÓN Y EARLY STOPPING ===
+      val_every: null           # Desactivar validación
+      val_episodes: 1           # 1 episodio de validación
+      early_stopping_patience: 10
+      early_stopping_min_delta: 50.0
 
     api:
       host: "0.0.0.0"

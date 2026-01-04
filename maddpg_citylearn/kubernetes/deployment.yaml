@@ -5,17 +5,41 @@ metadata:
   namespace: default
   labels:
     app: maddpg-citylearn
-    version: v1
+    version: v3.0.0-ep50
+    model: ctde-cooperative
+  annotations:
+    description: "MADDPG CTDE Cooperative - 17 building agents for energy flexibility"
+    model-version: "v3.0.0-ep50"
+    trained-episodes: "50"
+    trained-steps: "438000"
+    dataset: "citylearn_challenge_2022_phase_all_plus_evs"
+    # KPIs del modelo entrenado (vs baseline sin control)
+    kpi.cost-total: "1.185"
+    kpi.carbon-emissions: "1.207"
+    kpi.daily-peak-average: "1.028"
+    kpi.all-time-peak: "1.319"
+    kpi.electricity-consumption: "1.205"
+    kpi.load-factor: "1.331"
 spec:
   replicas: 2
   selector:
     matchLabels:
       app: maddpg-citylearn
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
         app: maddpg-citylearn
-        version: v1
+        version: v3.0.0-ep50
+        model: ctde-cooperative
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
     spec:
       # Security context for pod
       securityContext:
@@ -25,7 +49,7 @@ spec:
         
       containers:
       - name: maddpg-api
-        image: maddpg-citylearn:latest
+        image: maddpg-citylearn:v3.0.0-ep50
         imagePullPolicy: IfNotPresent
         
         ports:
@@ -33,7 +57,7 @@ spec:
           name: http
           protocol: TCP
         
-        # Environment variables
+        # Environment variables for CTDE model v3.0.0-ep50
         env:
         - name: PYTHONPATH
           value: "/app/src"
@@ -43,6 +67,18 @@ spec:
           value: "0.0.0.0"
         - name: API_PORT
           value: "8000"
+        - name: MODEL_TYPE
+          value: "CTDE_COOPERATIVE"
+        - name: MODEL_VERSION
+          value: "v3.0.0-ep50"
+        - name: NUM_AGENTS
+          value: "17"
+        - name: OBS_DIM
+          value: "28"
+        - name: ACTION_DIM
+          value: "6"
+        - name: TRAINED_EPISODES
+          value: "50"
         
         # Resource requests and limits
         resources:

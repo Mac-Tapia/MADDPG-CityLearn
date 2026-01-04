@@ -1,4 +1,7 @@
-# Kustomization overlay para GPU
+# Kustomization overlay para GPU - MADDPG CTDE v3.0.0-ep50
+# ============================================================================
+# Modelo: MADDPG CTDE Cooperative con aceleración GPU CUDA
+# Entrenado: 50 episodios (438,000 steps) en RTX 4060
 # Uso: kubectl apply -k kubernetes/overlays/gpu/
 
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -8,6 +11,11 @@ kind: Kustomization
 resources:
   - ../../
 
+# Imagen del modelo entrenado con soporte GPU
+images:
+  - name: maddpg-citylearn
+    newTag: v3.0.0-ep50
+
 # Parches para habilitar GPU
 patches:
   - patch: |-
@@ -15,6 +23,10 @@ patches:
       kind: Deployment
       metadata:
         name: maddpg-citylearn
+        annotations:
+          model-version: "v3.0.0-ep50"
+          trained-episodes: "50"
+          trained-device: "cuda-rtx4060"
       spec:
         template:
           spec:
@@ -36,6 +48,10 @@ patches:
                 value: "all"
               - name: NVIDIA_DRIVER_CAPABILITIES
                 value: "compute,utility"
+              - name: MODEL_VERSION
+                value: "v3.0.0-ep50"
+              - name: DEVICE
+                value: "cuda"
             tolerations:
             - key: "nvidia.com/gpu"
               operator: "Exists"
@@ -46,7 +62,9 @@ patches:
 # Etiquetas adicionales para GPU
 commonLabels:
   gpu-enabled: "true"
+  model-version: v3.0.0-ep50
 
 # Anotaciones para monitoreo GPU
 commonAnnotations:
   gpu.nvidia.com/enabled: "true"
+  model.maddpg/trained-episodes: "50"

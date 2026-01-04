@@ -1,4 +1,5 @@
 # ServiceMonitor para Prometheus Operator
+# MADDPG CTDE Cooperative Model - 17 Building Agents
 # Cumple con Guía 2025 - Sección 8.2 Métricas y Observabilidad
 # Permite que Prometheus descubra y scrape automáticamente los pods
 
@@ -11,6 +12,7 @@ metadata:
     app: maddpg-citylearn
     component: monitoring
     release: prometheus  # Label para que Prometheus Operator lo descubra
+    model-type: ctde-cooperative
 spec:
   # Selector del Service a monitorear
   selector:
@@ -30,7 +32,7 @@ spec:
       scrapeTimeout: 10s
       scheme: http
       
-      # Relabeling para agregar metadata
+      # Relabeling para agregar metadata del modelo CTDE
       relabelings:
         - sourceLabels: [__meta_kubernetes_pod_name]
           targetLabel: pod
@@ -40,11 +42,13 @@ spec:
           targetLabel: node
         - sourceLabels: [__meta_kubernetes_pod_label_version]
           targetLabel: version
+        - sourceLabels: [__meta_kubernetes_pod_label_model]
+          targetLabel: model_type
       
-      # Metric relabeling
+      # Metric relabeling - incluir métricas MADDPG y CTDE
       metricRelabelings:
         - sourceLabels: [__name__]
-          regex: 'maddpg_.*'
+          regex: 'maddpg_.*|ctde_.*|agent_.*'
           action: keep
 
 ---

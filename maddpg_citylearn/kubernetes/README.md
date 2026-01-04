@@ -1,8 +1,29 @@
-# Guía de Despliegue en Kubernetes - CooperativeMADDPG CityLearn
+# Guía de Despliegue en Kubernetes - MADDPG CTDE CityLearn
 
 ## Descripción
 
-Despliegue de **CooperativeMADDPG** (Multi-Agent Deep Deterministic Policy Gradient Cooperativo) con paradigma CTDE y Team Reward para control de flexibilidad energética en comunidades de edificios inteligentes.
+Despliegue de **MADDPG CTDE Cooperative** (Multi-Agent Deep Deterministic Policy Gradient) para control de flexibilidad energética en comunidades de edificios inteligentes.
+
+### Modelo Entrenado
+
+| Parámetro | Valor |
+|-----------|-------|
+| **Paradigma** | CTDE (Centralized Training, Decentralized Execution) |
+| **Agentes** | 17 edificios cooperativos |
+| **Episodios** | 50 (438,000 steps totales) |
+| **Dataset** | `citylearn_challenge_2022_phase_all_plus_evs` |
+| **Recompensa** | Team Reward Cooperativo |
+| **Observación** | (17, 28) - 28 features por agente |
+| **Acciones** | (17, 6) - 6 acciones continuas en [-1, 1] |
+
+### KPIs del Modelo (vs Baseline)
+
+| Métrica | Valor |
+|---------|-------|
+| Cost Total | 1.185 |
+| Carbon Emissions | 1.207 |
+| Daily Peak Average | 1.028 |
+| All Time Peak | 1.319 |
 
 ## Requisitos Previos
 
@@ -31,11 +52,13 @@ kubectl get nodes
 
 ```
 kubernetes/
-├── kustomization.yaml         # Base kustomize
-├── configmap-pvc.yaml         # ConfigMaps y PVCs
-├── deployment.yaml            # Deployment principal
+├── kustomization.yaml         # Base kustomize - CTDE Cooperative
+├── configmap-pvc.yaml         # ConfigMaps con hiperparámetros CTDE
+├── deployment.yaml            # Deployment principal (CPU)
+├── deployment-gpu.yaml        # Deployment con GPU NVIDIA
 ├── service.yaml               # Services (ClusterIP + LoadBalancer)
 ├── hpa.yaml                   # Horizontal Pod Autoscaler
+├── monitoring.yaml            # ServiceMonitor + PrometheusRule
 ├── ingress.yaml               # Ingress (nginx)
 ├── networkpolicy.yaml         # Políticas de red
 ├── deploy-k8s.ps1             # Script de despliegue

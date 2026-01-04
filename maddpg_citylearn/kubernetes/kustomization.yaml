@@ -1,12 +1,16 @@
-# Kustomization para MADDPG CityLearn
-# Permite desplegar todos los recursos de Kubernetes de forma organizada
+# Kustomization para MADDPG CityLearn - CTDE Cooperative Model
+# ============================================================================
+# Modelo: MADDPG con paradigma CTDE (Centralized Training, Decentralized Execution)
+# - 17 agentes (edificios) cooperando para optimización energética del distrito
+# - Entrenado por 50 episodios (438,000 steps) en dataset citylearn_challenge_2022_phase_all_plus_evs
+# - Team Reward: Todos los agentes comparten la misma recompensa global
 # Uso: kubectl apply -k kubernetes/
 
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 metadata:
-  name: maddpg-citylearn
+  name: maddpg-citylearn-ctde
 
 # Namespace donde se despliegan los recursos
 namespace: default
@@ -16,7 +20,7 @@ resources:
   # Seguridad
   - rbac.yaml
   - secrets.yaml
-  # Configuración
+  # Configuración CTDE
   - configmap-pvc.yaml
   # Despliegue
   - deployment.yaml
@@ -36,16 +40,22 @@ commonLabels:
   app.kubernetes.io/component: api
   app.kubernetes.io/part-of: citylearn-energy
   app.kubernetes.io/managed-by: kustomize
+  model-type: ctde-cooperative
+  num-agents: "17"
 
 # Anotaciones comunes
 commonAnnotations:
   project: "maddpg-citylearn-tesis"
   environment: "production"
+  model-paradigm: "CTDE"
+  trained-episodes: "50"
+  dataset: "citylearn_challenge_2022_phase_all_plus_evs"
+  reward-type: "team-reward-cooperative"
 
-# Imágenes - permite sobrescribir la imagen fácilmente
+# Imágenes - modelo CTDE entrenado 50 episodios
 images:
   - name: maddpg-citylearn
-    newTag: latest
+    newTag: v3.0.0-ep50
 
 # ConfigMap generator (alternativa al configmap estático)
 # configMapGenerator:

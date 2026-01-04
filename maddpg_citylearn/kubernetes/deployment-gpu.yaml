@@ -5,8 +5,20 @@ metadata:
   namespace: default
   labels:
     app: maddpg-citylearn
-    version: v1
+    version: v3.0.0-ep50
     gpu: "enabled"
+    model: ctde-cooperative
+  annotations:
+    description: "MADDPG CTDE Cooperative GPU - 17 building agents for energy flexibility"
+    model-version: "v3.0.0-ep50"
+    trained-episodes: "50"
+    trained-steps: "438000"
+    trained-device: "cuda-rtx4060"
+    dataset: "citylearn_challenge_2022_phase_all_plus_evs"
+    # KPIs del modelo entrenado
+    kpi.cost-total: "1.185"
+    kpi.carbon-emissions: "1.207"
+    kpi.daily-peak-average: "1.028"
 spec:
   replicas: 1  # GPU: solo 1 réplica por limitación de GPU local
   selector:
@@ -17,8 +29,13 @@ spec:
     metadata:
       labels:
         app: maddpg-citylearn
-        version: v1
+        version: v3.0.0-ep50
         gpu: "enabled"
+        model: ctde-cooperative
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
     spec:
       # Toleration para nodos con GPU
       tolerations:
@@ -28,7 +45,7 @@ spec:
       
       containers:
       - name: maddpg-api
-        image: maddpg-citylearn:latest
+        image: maddpg-citylearn:v3.0.0-ep50
         imagePullPolicy: Never  # Usar imagen local
         
         ports:
@@ -36,7 +53,7 @@ spec:
           name: http
           protocol: TCP
         
-        # Environment variables
+        # Environment variables for CTDE GPU model v3.0.0-ep50
         env:
         - name: PYTHONPATH
           value: "/app/src"
@@ -50,6 +67,20 @@ spec:
           value: "all"
         - name: NVIDIA_DRIVER_CAPABILITIES
           value: "compute,utility"
+        - name: MODEL_TYPE
+          value: "CTDE_COOPERATIVE"
+        - name: MODEL_VERSION
+          value: "v3.0.0-ep50"
+        - name: NUM_AGENTS
+          value: "17"
+        - name: OBS_DIM
+          value: "28"
+        - name: ACTION_DIM
+          value: "6"
+        - name: DEVICE
+          value: "cuda"
+        - name: TRAINED_EPISODES
+          value: "50"
         
         # Resource requests and limits CON GPU
         resources:
